@@ -3,6 +3,7 @@ const state = {
   perspective: "ops",
   selectedAgent: null,
   detailView: "profile",
+  agentPage: false,
   filters: {
     status: "all",
     businessUnit: "all",
@@ -364,6 +365,8 @@ function wireNavigation() {
       if (button.dataset.module === state.module) return;
       state.module = button.dataset.module;
       state.detailView = "profile";
+      state.agentPage = false;
+      state.selectedAgent = null;
       document
         .querySelectorAll(".nav-item")
         .forEach((item) => item.classList.remove("active"));
@@ -477,16 +480,22 @@ function renderFilters() {
 
   panel.querySelector("#status-filter").addEventListener("change", (event) => {
     state.filters.status = event.target.value;
+    state.agentPage = false;
+    state.selectedAgent = null;
     renderModule();
   });
 
   panel.querySelector("#bu-filter").addEventListener("change", (event) => {
     state.filters.businessUnit = event.target.value;
+    state.agentPage = false;
+    state.selectedAgent = null;
     renderModule();
   });
 
   panel.querySelector("#risk-filter").addEventListener("change", (event) => {
     state.filters.risk = event.target.value;
+    state.agentPage = false;
+    state.selectedAgent = null;
     renderModule();
   });
 }
@@ -504,132 +513,288 @@ function applyAgentFilters(list) {
 
 function renderInventoryModule(container) {
   const filteredAgents = applyAgentFilters(agents);
-  if (!state.selectedAgent || !filteredAgents.find((agent) => agent.id === state.selectedAgent)) {
+
+  if (state.agentPage && (!state.selectedAgent || !filteredAgents.find((agent) => agent.id === state.selectedAgent))) {
+    state.agentPage = false;
     state.selectedAgent = filteredAgents[0]?.id ?? null;
   }
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "detail-panel";
-  wrapper.innerHTML = `
-    <section>
-      <div class="section-header">
-        <h3>Agent Inventory</h3>
-        <p class="muted">${filteredAgents.length} agents match your filters.</p>
+  if (state.agentPage && state.selectedAgent) {
+    renderAgentPage(container);
+    return;
+  }
+
+  const boardHeader = document.createElement("section");
+  boardHeader.className = "inventory-overview";
+  const total = filteredAgents.length;
+  const activeCount = filteredAgents.filter((agent) => agent.status === "active").length;
+  const pausedCount = filteredAgents.filter((agent) => agent.status === "paused").length;
+  const failedCount = filteredAgents.filter((agent) => agent.status === "failed").length;
+  const highRisk = filteredAgents.filter((agent) => agent.riskLevel === "high").length;
+
+  boardHeader.innerHTML = `
+    <header>
+      <div>
+        <h3>Agent Flight Deck</h3>
+        <p class="muted">${total} agents match your filters. Grouped by operational status for fast triage.</p>
       </div>
-      <div class="agent-grid" id="agent-grid"></div>
-    </section>
-    <aside class="detail-card" id="agent-detail">
-      ${state.selectedAgent ? "" : `<p class="muted">Select an agent to view details.</p>`}
-    </aside>
+      <div class="inventory-pills">
+        <span class="status-pill green">${activeCount} Operational</span>
+        <span class="status-pill orange">${pausedCount} Needs Attention</span>
+        <span class="status-pill red">${failedCount} Offline</span>
+      </div>
+    </header>
+    <div class="inventory-summary">
+      <article>
+        <span>Total Hours Returned</span>
+        <strong>${filteredAgents
+          .reduce((acc, agent) => acc + agent.hoursSaved, 0)
+          .toLocaleString()}</strong>
+      </article>
+      <article>
+        <span>Average Success Rate</span>
+        <strong>${filteredAgents.length
+          ? Math.round(
+              (filteredAgents.reduce((acc, agent) => acc + agent.successRate, 0) /
+                filteredAgents.length) *
+                100
+            )
+          : 0}%</strong>
+      </article>
+      <article>
+        <span>Average Automation</span>
+        <strong>${filteredAgents.length
+          ? Math.round(
+              (filteredAgents.reduce((acc, agent) => acc + agent.automationRate, 0) /
+                filteredAgents.length) *
+                100
+            )
+          : 0}%</strong>
+      </article>
+      <article>
+        <span>High Risk Agents</span>
+        <strong>${highRisk}</strong>
+      </article>
+    </div>
   `;
 
-  container.appendChild(wrapper);
+  container.appendChild(boardHeader);
 
-  const grid = wrapper.querySelector("#agent-grid");
-  const template = document.getElementById("agent-card-template");
+  const board = document.createElement("div");
+  board.className = "inventory-board";
 
-  filteredAgents.forEach((agent) => {
-    const node = template.content.cloneNode(true);
-    node.querySelector(".agent-name").textContent = agent.name;
-    const statusNode = node.querySelector(".agent-status");
-    statusNode.textContent = agent.status;
-    statusNode.classList.add(agent.status);
+  const statusLaneMap = {
+    active: "operational",
+    running: "operational",
+    paused: "attention",
+    investigating: "attention",
+    canary: "attention",
+    failed: "offline",
+    escalated: "offline",
+  };
 
-    const meta = node.querySelector(".agent-meta");
-    meta.innerHTML = `
-      <div>
-        <dt>Business Unit</dt>
-        <dd>${agent.businessUnit}</dd>
-      </div>
-      <div>
-        <dt>Owner</dt>
-        <dd>${agent.owner}</dd>
-      </div>
-      <div>
-        <dt>Success Rate</dt>
-        <dd>${Math.round(agent.successRate * 100)}%</dd>
-      </div>
-      <div>
-        <dt>Automation</dt>
-        <dd>${Math.round(agent.automationRate * 100)}%</dd>
-      </div>
+  const lanes = [
+    {
+      id: "operational",
+      label: "Operational",
+      caption: "Healthy throughput & within guardrails.",
+      accent: "green",
+    },
+    {
+      id: "attention",
+      label: "Needs Attention",
+      caption: "Guardrails warming or latency drift detected.",
+      accent: "orange",
+    },
+    {
+      id: "offline",
+      label: "Offline / Failed",
+      caption: "HITL or restart required before resuming.",
+      accent: "red",
+    },
+    {
+      id: "other",
+      label: "Other States",
+      caption: "Queued for deployment or waiting on signal.",
+      accent: "slate",
+    },
+  ];
+
+  lanes.forEach((lane) => {
+    const column = document.createElement("section");
+    column.className = `inventory-lane accent-${lane.accent}`;
+    const laneAgents = filteredAgents.filter((agent) => {
+      const mapped = statusLaneMap[agent.status] ?? "other";
+      return mapped === lane.id;
+    });
+
+    column.innerHTML = `
+      <header>
+        <div>
+          <h4>${lane.label}</h4>
+          <p class="muted">${lane.caption}</p>
+        </div>
+        <span class="lane-count">${laneAgents.length}</span>
+      </header>
+      <div class="lane-body ${laneAgents.length ? "" : "empty"}"></div>
     `;
 
-    node.querySelector(".view-details").addEventListener("click", () => {
-      state.selectedAgent = agent.id;
-      state.detailView = "profile";
-      renderModule();
-    });
+    const body = column.querySelector(".lane-body");
 
-    node.querySelector(".view-dependencies").addEventListener("click", () => {
-      state.selectedAgent = agent.id;
-      state.detailView = "dependencies";
-      renderModule();
-    });
-
-    if (agent.id === state.selectedAgent) {
-      node.querySelector(".agent-card").classList.add("active-selection");
+    if (!laneAgents.length) {
+      body.innerHTML = `<p class="muted">No agents in this lane.</p>`;
+    } else {
+      laneAgents.forEach((agent) => body.appendChild(buildAgentTile(agent)));
     }
 
-    grid.appendChild(node);
+    board.appendChild(column);
   });
 
-  if (state.selectedAgent) {
-    renderAgentDetail(wrapper.querySelector("#agent-detail"));
-  }
+  container.appendChild(board);
 }
 
-function renderAgentDetail(detailContainer) {
-  const agent = agents.find((item) => item.id === state.selectedAgent);
-  if (!agent) return;
-
-  detailContainer.innerHTML = `
-    <header class="detail-header">
-      <h3>${agent.name}</h3>
+function buildAgentTile(agent) {
+  const card = document.createElement("article");
+  card.className = `agent-tile risk-${agent.riskLevel}`;
+  card.innerHTML = `
+    <header>
+      <div>
+        <h5>${agent.name}</h5>
+        <p class="muted">${agent.id} · ${agent.businessUnit}</p>
+      </div>
       <span class="status-pill ${statusToColor(agent.status)}">${agent.status.toUpperCase()}</span>
     </header>
-    <div class="detail-grid">
+    <div class="tile-metrics">
       <div>
-        <span>Business Unit</span>
-        <strong>${agent.businessUnit}</strong>
-      </div>
-      <div>
-        <span>Owner</span>
-        <strong>${agent.owner}</strong>
-      </div>
-      <div>
-        <span>Success Rate</span>
+        <span>Success</span>
         <strong>${Math.round(agent.successRate * 100)}%</strong>
       </div>
       <div>
-        <span>Automation Rate</span>
+        <span>Automation</span>
         <strong>${Math.round(agent.automationRate * 100)}%</strong>
       </div>
       <div>
-        <span>Average Latency</span>
-        <strong>${agent.avgLatency} sec</strong>
-      </div>
-      <div>
-        <span>Hours Saved</span>
-        <strong>${agent.hoursSaved.toLocaleString()}</strong>
+        <span>Latency</span>
+        <strong>${agent.avgLatency}s</strong>
       </div>
     </div>
-    <div class="detail-switcher">
-      <button class="ghost-btn ${state.detailView === "profile" ? "active" : ""}" data-view="profile">Run Log</button>
-      <button class="ghost-btn ${state.detailView === "dependencies" ? "active" : ""}" data-view="dependencies">Dependency Graph</button>
-      <button class="ghost-btn ${state.detailView === "guardrails" ? "active" : ""}" data-view="guardrails">Guardrails</button>
-    </div>
-    <div class="detail-body" id="detail-body"></div>
+    <footer>
+      <span class="risk-chip risk-${agent.riskLevel}">Risk: ${agent.riskLevel.toUpperCase()}</span>
+      <button class="ghost-btn tile-open" type="button">Open Agent</button>
+    </footer>
   `;
 
-  detailContainer.querySelectorAll(".detail-switcher .ghost-btn").forEach((button) => {
+  card.querySelector(".tile-open").addEventListener("click", (event) => {
+    event.stopPropagation();
+    state.selectedAgent = agent.id;
+    state.detailView = "profile";
+    state.agentPage = true;
+    renderModule();
+  });
+
+  card.addEventListener("click", () => {
+    state.selectedAgent = agent.id;
+    state.detailView = "profile";
+    state.agentPage = true;
+    renderModule();
+  });
+
+  return card;
+}
+
+function renderAgentPage(container) {
+  const agent = agents.find((item) => item.id === state.selectedAgent);
+  if (!agent) {
+    state.agentPage = false;
+    renderInventoryModule(container);
+    return;
+  }
+
+  const page = document.createElement("section");
+  page.className = "agent-page";
+  page.innerHTML = `
+    <button class="ghost-btn back-button" type="button">← Back to inventory</button>
+    <header class="agent-hero">
+      <div>
+        <span class="muted">${agent.id}</span>
+        <h3>${agent.name}</h3>
+        <div class="agent-hero-meta">
+          <span>${agent.businessUnit}</span>
+          <span>${agent.owner}</span>
+          <span class="risk-chip risk-${agent.riskLevel}">Risk: ${agent.riskLevel.toUpperCase()}</span>
+        </div>
+      </div>
+      <div class="agent-hero-actions">
+        <span class="status-pill ${statusToColor(agent.status)}">${agent.status.toUpperCase()}</span>
+        <div class="hero-buttons">
+          <button class="primary-btn" type="button">Launch Playbook</button>
+          <button class="ghost-btn" type="button">Pause Agent</button>
+          <button class="ghost-btn" type="button">Escalate</button>
+        </div>
+      </div>
+    </header>
+    <section class="agent-metric-band">
+      ${[
+        { label: "Success Rate", value: `${Math.round(agent.successRate * 100)}%` },
+        { label: "Automation", value: `${Math.round(agent.automationRate * 100)}%` },
+        { label: "Average Latency", value: `${agent.avgLatency}s` },
+        { label: "Hours Saved", value: agent.hoursSaved.toLocaleString() },
+        { label: "Last Incident", value: agent.lastIncident },
+      ]
+        .map(
+          (item) => `
+            <article>
+              <span>${item.label}</span>
+              <strong>${item.value}</strong>
+            </article>
+          `
+        )
+        .join("")}
+    </section>
+    <div class="agent-page-grid">
+      <section class="agent-core">
+        <nav class="detail-switcher">
+          <button class="ghost-btn ${state.detailView === "profile" ? "active" : ""}" data-view="profile" type="button">Run Log</button>
+          <button class="ghost-btn ${state.detailView === "dependencies" ? "active" : ""}" data-view="dependencies" type="button">Dependency Graph</button>
+          <button class="ghost-btn ${state.detailView === "guardrails" ? "active" : ""}" data-view="guardrails" type="button">Guardrails</button>
+        </nav>
+        <div class="detail-body" id="detail-body"></div>
+      </section>
+      <aside class="agent-side">
+        <article class="detail-card">
+          <h4>Operational Checklist</h4>
+          <ul class="checklist">
+            <li>Blast radius reviewed</li>
+            <li>Guardrail pack synced</li>
+            <li>Escalation rota acknowledged</li>
+            <li>Telemetry routed to observability hub</li>
+          </ul>
+        </article>
+        <article class="detail-card">
+          <h4>Recent Activity</h4>
+          <div class="timeline">${agent.recentActivity
+            .map((entry) => `<div class="timeline-item">${entry}</div>`)
+            .join("")}</div>
+        </article>
+      </aside>
+    </div>
+  `;
+
+  page.querySelector(".back-button").addEventListener("click", () => {
+    state.agentPage = false;
+    renderModule();
+  });
+
+  page.querySelectorAll(".detail-switcher .ghost-btn").forEach((button) => {
     button.addEventListener("click", () => {
       state.detailView = button.dataset.view;
-      renderAgentDetail(detailContainer);
+      renderAgentPage(container);
     });
   });
 
-  const body = detailContainer.querySelector("#detail-body");
+  container.appendChild(page);
+
+  const body = page.querySelector("#detail-body");
   if (state.detailView === "dependencies") {
     body.innerHTML = renderDependencies(agent);
   } else if (state.detailView === "guardrails") {
@@ -948,20 +1113,20 @@ function renderOptimizationModule(container) {
 const style = document.createElement("style");
 style.textContent = `
   .muted { color: var(--text-muted); }
-  .detail-card.nested { background: rgba(8, 10, 20, 0.95); border-style: dashed; }
-  .detail-switcher { display: flex; gap: 8px; }
-  .detail-switcher .ghost-btn.active { background: rgba(132, 255, 224, 0.25); color: var(--bg-900); }
-  .detail-card strong { display: block; font-size: 1.2rem; }
+  .detail-card.nested { background: var(--surface-alt); border-style: dashed; border-color: rgba(37, 99, 235, 0.2); }
+  .detail-switcher { display: flex; gap: 8px; flex-wrap: wrap; }
+  .detail-switcher .ghost-btn.active { background: rgba(37, 99, 235, 0.16); color: var(--text-primary); }
+  .detail-card strong { display: block; font-size: 1.15rem; }
   .section-header { display: flex; justify-content: space-between; align-items: baseline; }
   .section-header h3 { margin: 0; }
   .experiment-list { display: grid; gap: 16px; }
-  .experiment { display: grid; gap: 10px; background: rgba(8, 10, 20, 0.9); border: 1px solid rgba(132, 255, 224, 0.1); padding: 16px; border-radius: var(--radius-md); }
-  .experiment-meta { display: flex; align-items: center; gap: 12px; }
-  .progress { flex: 1; height: 6px; border-radius: 999px; background: rgba(132, 255, 224, 0.1); overflow: hidden; }
-  .progress-bar { height: 100%; background: linear-gradient(90deg, rgba(132, 255, 224, 0.6), rgba(93, 216, 255, 0.9)); }
-  .agent-card.active-selection { outline: 1px solid rgba(132, 255, 224, 0.4); box-shadow: 0 0 0 3px rgba(132, 255, 224, 0.12); }
+  .experiment { display: grid; gap: 10px; background: var(--surface-alt); border: 1px solid rgba(37, 99, 235, 0.14); padding: 16px; border-radius: var(--radius-md); }
+  .experiment-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .progress { flex: 1; height: 6px; border-radius: 999px; background: rgba(37, 99, 235, 0.12); overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.9)); }
+  .agent-card.active-selection { outline: 1px solid rgba(37, 99, 235, 0.35); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
   #filter-panel { display: grid; gap: 12px; }
   .filter { display: grid; gap: 6px; font-size: 0.85rem; color: var(--text-muted); }
-  .filter select { background: rgba(11, 14, 25, 0.9); border: 1px solid rgba(132, 255, 224, 0.25); border-radius: var(--radius-sm); padding: 8px; color: var(--text-primary); }
+  .filter select { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 8px; color: var(--text-primary); }
 `;
 document.head.appendChild(style);
