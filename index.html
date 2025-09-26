@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Command Center</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-acronym">ACC</span>
+        <div class="brand-details">
+          <h1>Agent Command Center</h1>
+          <p>Mission Control for Enterprise AI</p>
+        </div>
+      </div>
+      <nav class="primary-nav" aria-label="Primary">
+        <button class="nav-item active" data-module="inventory">
+          <span>Inventory Manager</span>
+          <small>All agents &amp; workflows</small>
+        </button>
+        <button class="nav-item" data-module="hitl">
+          <span>HITL Console</span>
+          <small>Action queues &amp; SLAs</small>
+        </button>
+        <button class="nav-item" data-module="insights">
+          <span>Outcome Insights</span>
+          <small>ROI &amp; performance</small>
+        </button>
+        <button class="nav-item" data-module="governance">
+          <span>Governance</span>
+          <small>Policies &amp; guardrails</small>
+        </button>
+        <button class="nav-item" data-module="optimization">
+          <span>Optimization Lab</span>
+          <small>Experiments &amp; tuning</small>
+        </button>
+      </nav>
+      <section class="sidebar-section">
+        <h2>Filters</h2>
+        <div id="filter-panel"></div>
+      </section>
+      <section class="sidebar-section">
+        <h2>Integrations</h2>
+        <ul class="integration-list">
+          <li>Palantir AIP</li>
+          <li>Databricks Mosaic</li>
+          <li>ServiceNow</li>
+          <li>Jira</li>
+          <li>SIEM / SOAR</li>
+        </ul>
+      </section>
+    </aside>
+    <main class="main-content">
+      <header class="topline" aria-live="polite">
+        <div class="topline-info">
+          <h2 id="module-title">Inventory Manager</h2>
+          <p id="module-subtitle">Real-time view of deployed agents, their state, and health.</p>
+        </div>
+        <div class="view-toggle" role="group" aria-label="Perspective">
+          <button class="toggle-btn active" data-perspective="ops">Ops</button>
+          <button class="toggle-btn" data-perspective="exec">Exec</button>
+          <button class="toggle-btn" data-perspective="security">Security</button>
+        </div>
+      </header>
+      <section id="overview-metrics" class="overview-grid"></section>
+      <section id="module-container" class="module-container" aria-live="polite"></section>
+    </main>
+  </div>
+  <template id="agent-card-template">
+    <article class="agent-card">
+      <header>
+        <h3 class="agent-name"></h3>
+        <span class="agent-status"></span>
+      </header>
+      <dl class="agent-meta"></dl>
+      <footer class="agent-footer">
+        <button class="ghost-btn view-details">Open</button>
+        <button class="ghost-btn view-dependencies">Dependencies</button>
+      </footer>
+    </article>
+  </template>
+  <template id="queue-card-template">
+    <article class="queue-card">
+      <header>
+        <div>
+          <h3 class="queue-title"></h3>
+          <p class="queue-meta"></p>
+        </div>
+        <span class="queue-sla"></span>
+      </header>
+      <p class="queue-description"></p>
+      <footer>
+        <button class="ghost-btn resolve-btn">Resolve</button>
+        <button class="ghost-btn escalate-btn">Escalate</button>
+      </footer>
+    </article>
+  </template>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
