@@ -13,7 +13,7 @@ const state = {
 
 const copy = {
   inventory: {
-    title: "Inventory Manager",
+    title: "Agents Home",
     subtitle: "Real-time view of deployed agents, their state, and health.",
   },
   hitl: {

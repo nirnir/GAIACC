@@ -4,7 +4,7 @@ The Agent Command Center is a mission-control inspired console for monitoring, g
 
 ## Features
 
-- **Inventory Manager** – browse agents across business units, inspect dependencies, guardrails, and recent activity.
+- **Agents Home** – browse agents across business units, inspect dependencies, guardrails, and recent activity.
 - **Operational HITL Console** – triage escalations with SLA-aware queues and simple resolution/escalation controls.
 - **Outcome Insights** – connect runs and tasks directly to business KPIs for executives and operations teams.
 - **Governance Workspace** – track guardrail coverage and assemble evidence packs for audits in seconds.
