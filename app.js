@@ -32,6 +32,11 @@ const WORKFLOW_LANES = [
   { key: "completed", label: "Completed", accent: "slate" },
 ];
 
+const LANE_CARD_LIMITS = {
+  min: 2,
+  max: 4,
+};
+
 const slugify = (value) =>
   value
     .toString()
@@ -438,16 +443,24 @@ function buildInventoryBoard(filteredWorkflows) {
     const body = document.createElement("div");
     body.className = "lane-body";
 
-    if (!workflowsInLane.length) {
-      body.classList.add("empty");
-      const empty = document.createElement("p");
-      empty.className = "muted";
-      empty.textContent = "No workflows in this lane.";
-      body.appendChild(empty);
-    } else {
-      workflowsInLane.forEach((workflow) => {
-        body.appendChild(buildWorkflowTile(workflow));
-      });
+    const visibleWorkflows = workflowsInLane.slice(0, LANE_CARD_LIMITS.max);
+
+    visibleWorkflows.forEach((workflow) => {
+      body.appendChild(buildWorkflowTile(workflow));
+    });
+
+    const placeholdersNeeded = Math.max(
+      0,
+      LANE_CARD_LIMITS.min - visibleWorkflows.length
+    );
+
+    for (let index = 0; index < placeholdersNeeded; index += 1) {
+      body.appendChild(buildWorkflowPlaceholderTile(lane));
+    }
+
+    const overflowCount = workflowsInLane.length - visibleWorkflows.length;
+    if (overflowCount > 0) {
+      body.appendChild(buildLaneOverflowNotice(overflowCount));
     }
 
     laneRoot.appendChild(header);
@@ -543,6 +556,28 @@ function buildWorkflowTile(workflow) {
   });
 
   return tile;
+}
+
+function buildWorkflowPlaceholderTile(lane) {
+  const placeholder = document.createElement("article");
+  placeholder.className = "agent-tile workflow-tile workflow-placeholder";
+  placeholder.tabIndex = -1;
+  placeholder.setAttribute("aria-hidden", "true");
+  placeholder.innerHTML = `
+    <div class="placeholder-body">
+      <span class="placeholder-label">${lane.label}</span>
+      <strong>Slot available</strong>
+      <p>Assign a workflow to balance load.</p>
+    </div>
+  `;
+  return placeholder;
+}
+
+function buildLaneOverflowNotice(extraCount) {
+  const notice = document.createElement("div");
+  notice.className = "lane-overflow";
+  notice.textContent = `+${extraCount} more workflow${extraCount > 1 ? "s" : ""}`;
+  return notice;
 }
 
 function renderHitlModule(root) {
