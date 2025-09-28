@@ -21,6 +21,115 @@ export const copy = {
   },
 };
 
+export const agentCatalog = {
+  automated: [
+    {
+      name: "Dynamic Menu Optimization",
+      type: "Food & Consumer Apps",
+      properties:
+        "Analyzes consumption patterns, dietary needs, waste levels, and supplier availability to update menus daily across sites.",
+    },
+    {
+      name: "Personalized Promotions",
+      type: "Food & Consumer Apps",
+      properties:
+        "Tailors offers to user segments such as students, employees, and patients, pushing them through Everyday/So’Eze to drive adoption and revenue lift.",
+    },
+    {
+      name: "Order Routing & Capacity Management",
+      type: "Food & Consumer Apps",
+      properties:
+        "Balances demand across kitchens, kiosks, and delivery partners while adjusting prep schedules to minimize wait times and food waste.",
+    },
+    {
+      name: "Predictive Maintenance",
+      type: "Facility Management",
+      properties:
+        "Monitors IoT sensor data, predicts equipment failures, and automatically generates work orders in Service Cloud (Keystone).",
+    },
+    {
+      name: "Energy Optimization",
+      type: "Facility Management",
+      properties:
+        "Dynamically adjusts HVAC, lighting, and cleaning schedules based on occupancy and weather to drive sustainability KPIs.",
+    },
+    {
+      name: "Compliance Automation",
+      type: "Facility Management",
+      properties:
+        "Monitors cleaning and safety service data to ensure SLA compliance automatically, escalating only exceptions.",
+    },
+    {
+      name: "Shift Scheduling",
+      type: "Workforce & Ops",
+      properties:
+        "Forecasts demand such as lunch peaks and events, auto-generates optimized rosters, and syncs schedules with HR systems.",
+    },
+    {
+      name: "Inventory & Procurement",
+      type: "Workforce & Ops",
+      properties:
+        "Tracks stock levels, places restock orders, and negotiates prices dynamically across suppliers.",
+    },
+    {
+      name: "Contract Bidding Support",
+      type: "Workforce & Ops",
+      properties:
+        "Ingests bid requirements and auto-drafts Sodexo responses with historical benchmarks and compliance checks.",
+    },
+  ],
+  assisted: [
+    {
+      name: "Operations Copilot",
+      type: "Onsite Staff & Managers",
+      properties:
+        "ServiceNow/Jira-style console where managers explore performance drivers, surface correlations, and get recommended actions.",
+    },
+    {
+      name: "Menu & Nutrition Copilot",
+      type: "Onsite Staff & Managers",
+      properties:
+        "Helps chefs adapt recipes instantly for allergies and dietary needs while checking costs and supplier availability.",
+    },
+    {
+      name: "Contract Copilot",
+      type: "Onsite Staff & Managers",
+      properties:
+        "Assists sales teams with client-facing proposals by pulling case studies, KPIs, and regulatory requirements.",
+    },
+    {
+      name: "Maintenance Copilot",
+      type: "Facility Teams",
+      properties:
+        "Guides frontline staff through repairs via AR glasses or mobile apps and auto-updates maintenance logs.",
+    },
+    {
+      name: "Cleaning & Safety Copilot",
+      type: "Facility Teams",
+      properties:
+        "Provides supervisors with instant compliance risk maps and recommended actions when issues emerge.",
+    },
+    {
+      name: "Adoption & ROI Insights",
+      type: "Executives & Digital Leaders",
+      properties:
+        "Surfaces digital solution adoption, revenue impact, and retention trends across regions for platforms like Everyday, So’Eze, and Wando.",
+    },
+    {
+      name: "Strategic Planning Copilot",
+      type: "Executives & Digital Leaders",
+      properties:
+        "Combines financials, adoption, and market data to simulate scenarios such as expansion of So’Eze to additional universities.",
+    },
+    {
+      name: "Client Portal Copilot",
+      type: "Clients",
+      properties:
+        "Helps B2B clients monitor site performance, user satisfaction, sustainability impact, and costs through natural-language queries.",
+    },
+  ],
+};
+
 export const agents = [
   {
     id: "AIOPS-017",

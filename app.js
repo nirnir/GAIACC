@@ -1,6 +1,7 @@
 import {
   copy,
   agents,
+  agentCatalog,
   actionQueue,
   insights,
   recommendations,
@@ -162,6 +163,9 @@ function renderModule() {
 }
 
 function renderInventoryModule(root) {
+  const catalogSection = buildAgentCatalogSection();
+  root.appendChild(catalogSection);
+
   const filteredAgents = agents.filter((agent) => {
     const statusMatch =
       state.filters.status === "all" || agent.status === state.filters.status;
@@ -188,6 +192,79 @@ function renderInventoryModule(root) {
   }
 
   root.appendChild(overview);
+}
+
+function buildAgentCatalogSection() {
+  const section = document.createElement("section");
+  section.className = "agent-catalog";
+
+  const heading = document.createElement("header");
+  heading.className = "catalog-header";
+  heading.innerHTML = `
+    <h3>Agent Catalog</h3>
+    <p class="muted">A quick reference for automated workflows and assisted copilots available across the enterprise.</p>
+  `;
+  section.appendChild(heading);
+
+  const catalogGroups = [
+    {
+      title: "Automated Agentic AI Workflows",
+      description: "Hands-off automations operating within guardrails.",
+      entries: agentCatalog.automated,
+    },
+    {
+      title: "Assisted Agentic AI (Copilot / Human-in-the-Loop)",
+      description: "Embedded copilots that support teams with insights and recommendations.",
+      entries: agentCatalog.assisted,
+    },
+  ];
+
+  catalogGroups.forEach((group) => {
+    const groupSection = document.createElement("section");
+    groupSection.className = "catalog-group";
+
+    const groupHeader = document.createElement("header");
+    groupHeader.innerHTML = `
+      <h4>${group.title}</h4>
+      <p class="muted">${group.description}</p>
+    `;
+    groupSection.appendChild(groupHeader);
+
+    const tableWrapper = document.createElement("div");
+    tableWrapper.className = "catalog-table-wrapper";
+
+    const table = document.createElement("table");
+    table.className = "catalog-table";
+
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th scope="col">Agent Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Key Properties</th>
+        </tr>
+      </thead>
+    `;
+
+    const tbody = document.createElement("tbody");
+
+    group.entries.forEach((entry) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <th scope="row">${entry.name}</th>
+        <td data-label="Type">${entry.type}</td>
+        <td data-label="Key Properties">${entry.properties}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+    tableWrapper.appendChild(table);
+    groupSection.appendChild(tableWrapper);
+    section.appendChild(groupSection);
+  });
+
+  return section;
 }
 
 function buildInventoryHeader(agentCount) {
