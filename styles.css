@@ -722,21 +722,79 @@ body {
   color: var(--text-secondary);
 }
 
-.agent-page {
-  display: grid;
-  gap: 24px;
+.agent-page-body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, rgba(37, 99, 235, 0.12), transparent 55%), var(--bg-900);
 }
 
-.agent-hero {
+.agent-topbar {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  padding: 20px 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-soft);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.topbar-brand .brand-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.topbar-brand .brand-copy strong {
+  font-size: 1.1rem;
+}
+
+.topbar-brand .brand-copy span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.agent-main {
+  padding: 32px 36px 48px;
+  display: grid;
+  gap: 28px;
+}
+
+.agent-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.agent-detail-primary,
+.agent-detail-secondary {
+  display: grid;
   gap: 18px;
 }
 
-.agent-hero h3 {
+.agent-hero-card {
+  gap: 20px;
+}
+
+.agent-hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.agent-hero-header h1 {
   margin: 8px 0 0;
-  font-size: 1.8rem;
+  font-size: 2rem;
 }
 
 .agent-hero-meta {
@@ -744,11 +802,11 @@ body {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 12px;
-  color: var(--text-muted);
   font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
-.agent-hero-actions {
+.agent-hero-status {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -762,53 +820,262 @@ body {
   justify-content: flex-end;
 }
 
-.agent-metric-band {
+.agent-hero-foot {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 18px;
+}
+
+.agent-hero-foot span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.agent-hero-foot strong {
+  font-size: 1.3rem;
+}
+
+.hitl-console {
+  gap: 20px;
+}
+
+.hitl-queue {
+  display: grid;
+  gap: 14px;
+}
+
+.hitl-item {
+  background: var(--surface-alt);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: grid;
   gap: 16px;
 }
 
-.agent-metric-band article {
-  background: var(--surface);
+.hitl-item header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.hitl-item strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.hitl-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.hitl-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hitl-note {
+  display: grid;
+  gap: 10px;
+}
+
+.hitl-note textarea {
+  resize: vertical;
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.hitl-note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.char-count {
+  font-size: 0.8rem;
+}
+
+.performance-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.performance-metric-grid article {
+  background: var(--surface-alt);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(37, 99, 235, 0.14);
   padding: 16px;
   display: grid;
   gap: 6px;
 }
 
-.agent-metric-band span {
+.performance-metric-grid span {
   font-size: 0.85rem;
   color: var(--text-muted);
 }
 
-.agent-metric-band strong {
-  font-size: 1.3rem;
+.performance-metric-grid small {
+  font-size: 0.75rem;
 }
 
-.agent-page-grid {
+.error-breakdown {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 20px;
+  gap: 12px;
 }
 
-.agent-core {
+.error-row {
   display: grid;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 3fr) auto;
+  gap: 12px;
+  align-items: center;
 }
 
-.agent-side {
+.error-label {
   display: grid;
-  gap: 16px;
+  gap: 4px;
 }
 
-.checklist {
+.error-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(37, 99, 235, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.error-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.9));
+}
+
+.error-count {
+  font-weight: 600;
+}
+
+.incident-item {
+  display: grid;
+  gap: 4px;
+}
+
+.incident-item strong {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.evaluation-notes {
+  display: grid;
+  gap: 10px;
+}
+
+.evaluation-notes h4 {
+  margin: 0;
+}
+
+.note-list {
   margin: 0;
   padding-left: 20px;
   display: grid;
   gap: 8px;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+.insight-actions {
+  display: grid;
+  gap: 16px;
+}
+
+.insight-action {
+  display: grid;
+  gap: 10px;
+  background: var(--surface-alt);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.insight-action header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.insight-action footer {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.insight-action button {
+  justify-self: flex-start;
+}
+
+.insight-opportunities .badge-grid {
+  margin-top: 10px;
+}
+
+.playbook-card,
+.activity-card,
+.guardrail-card,
+.dependencies-card {
+  gap: 12px;
+}
+
+.agent-missing {
+  max-width: 520px;
+  text-align: center;
+  margin: 60px auto;
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .agent-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-hero-status {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .agent-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .agent-main {
+    padding: 24px;
+  }
+
+  .hero-buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .hitl-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .insight-action footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .queue-layout {
@@ -1014,7 +1281,7 @@ body {
     padding: 24px;
   }
 
-  .agent-page-grid {
+  .agent-detail-grid {
     grid-template-columns: 1fr;
   }
 }
