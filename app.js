@@ -652,6 +652,18 @@ function buildAgentCatalogSection() {
   const section = document.createElement("section");
   section.className = "agent-catalog";
   section.setAttribute("aria-labelledby", "agent-catalog-heading");
+
+  const tableRows = agentCatalog.flatMap((pillar) =>
+    pillar.groups.flatMap((group) =>
+      group.items.map((item) => ({
+        mode: pillar.title,
+        audience: group.name,
+        name: item.title,
+        outcome: item.description,
+      }))
+    )
+  );
+
   section.innerHTML = `
     <header class="catalog-header">
       <div>
@@ -659,42 +671,46 @@ function buildAgentCatalogSection() {
         <p class="muted">Explore Sodexo's production-ready automations and guided copilots.</p>
       </div>
     </header>
-    <div class="catalog-layout">
+    <div class="catalog-legends">
       ${agentCatalog
         .map(
-          (pillar, pillarIndex) => `
-            <article class="catalog-column" aria-labelledby="pillar-${pillarIndex}">
-              <header>
-                <h4 id="pillar-${pillarIndex}">${pillar.title}</h4>
-                <p class="muted">${pillar.description}</p>
-              </header>
-              <div class="catalog-groups">
-                ${pillar.groups
-                  .map(
-                    (group, groupIndex) => `
-                      <section class="catalog-group" aria-labelledby="pillar-${pillarIndex}-group-${groupIndex}">
-                        <h5 id="pillar-${pillarIndex}-group-${groupIndex}">${group.name}</h5>
-                        <ul>
-                          ${group.items
-                            .map(
-                              (item) => `
-                                <li>
-                                  <strong>${item.title}</strong>
-                                  <p>${item.description}</p>
-                                </li>
-                              `
-                            )
-                            .join("")}
-                        </ul>
-                      </section>
-                    `
-                  )
-                  .join("")}
-              </div>
+          (pillar) => `
+            <article class="catalog-legend-card">
+              <h4>${pillar.title}</h4>
+              <p>${pillar.description}</p>
             </article>
           `
         )
         .join("")}
+    </div>
+    <div class="catalog-table-wrapper">
+      <table class="catalog-table">
+        <caption class="visually-hidden">Catalog of Agentic AI automations and copilots by mode, audience, and outcomes</caption>
+        <thead>
+          <tr>
+            <th scope="col">Execution Mode</th>
+            <th scope="col">Primary Audience</th>
+            <th scope="col">Agent / Workflow</th>
+            <th scope="col">What It Delivers</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows
+            .map(
+              (row) => `
+                <tr>
+                  <td data-label="Execution Mode">
+                    <span class="catalog-pill">${row.mode}</span>
+                  </td>
+                  <td data-label="Primary Audience">${row.audience}</td>
+                  <td data-label="Agent / Workflow">${row.name}</td>
+                  <td data-label="What It Delivers">${row.outcome}</td>
+                </tr>
+              `
+            )
+            .join("")}
+        </tbody>
+      </table>
     </div>
   `;
 
