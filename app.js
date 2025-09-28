@@ -1,22 +1,20 @@
 import {
   copy,
-  agents,
   agentCatalog,
   actionQueue,
   insights,
   recommendations,
   policies,
   experiments,
+  workflows,
 } from "./data.js";
-import { statusToColor } from "./utils.js";
+import { statusToColor, categorizeWorkflowStatus } from "./utils.js";
 
 const state = {
   module: "inventory",
   perspective: "ops",
   filters: {
     status: "all",
-    businessUnit: "all",
-    risk: "all",
   },
 };
 
@@ -25,6 +23,13 @@ const telemetry = [
   "Security | AI Gateway policy drift resolved with auto-sync.",
   "Compliance | Generated audit evidence pack for GDPR controllers.",
   "Product | New agent templates published for Finance close workflows.",
+];
+
+const WORKFLOW_LANES = [
+  { key: "running", label: "Running", accent: "green" },
+  { key: "paused", label: "Paused", accent: "orange" },
+  { key: "requires-attention", label: "Requires Attention", accent: "red" },
+  { key: "completed", label: "Completed", accent: "slate" },
 ];
 
 const slugify = (value) =>
@@ -77,22 +82,15 @@ const createAdoptionBadge = (value) => {
 const baseFilterOptions = {
   status: [
     { label: "All statuses", value: "all" },
-    { label: "Active", value: "active" },
+    { label: "Running", value: "running" },
     { label: "Paused", value: "paused" },
-    { label: "Failed", value: "failed" },
-  ],
-  risk: [
-    { label: "All risk", value: "all" },
-    { label: "Low", value: "low" },
-    { label: "Medium", value: "medium" },
-    { label: "High", value: "high" },
+    { label: "Requires Attention", value: "requires-attention" },
+    { label: "Completed", value: "completed" },
   ],
 };
 
 const filterLabels = {
   status: "Status",
-  businessUnit: "Business unit",
-  risk: "Risk level",
 };
 
 document.addEventListener("DOMContentLoaded", init);
@@ -106,16 +104,7 @@ function init() {
 }
 
 function getFilterOptions() {
-  const businessUnits = Array.from(new Set(agents.map((agent) => agent.businessUnit)))
-    .sort((a, b) => a.localeCompare(b));
-
-  return {
-    ...baseFilterOptions,
-    businessUnit: [
-      { label: "All business units", value: "all" },
-      ...businessUnits.map((unit) => ({ label: unit, value: unit })),
-    ],
-  };
+  return baseFilterOptions;
 }
 
 function renderFilters() {
@@ -210,29 +199,24 @@ function renderModule() {
 }
 
 function renderInventoryModule(root) {
-  const filteredAgents = agents.filter((agent) => {
-    const statusMatch =
-      state.filters.status === "all" || agent.status === state.filters.status;
-    const riskMatch =
-      state.filters.risk === "all" || agent.riskLevel === state.filters.risk;
-    const businessUnitMatch =
-      state.filters.businessUnit === "all" || agent.businessUnit === state.filters.businessUnit;
-    return statusMatch && riskMatch && businessUnitMatch;
+  const filteredWorkflows = workflows.filter((workflow) => {
+    const laneKey = categorizeWorkflowStatus(workflow.status);
+    return state.filters.status === "all" || laneKey === state.filters.status;
   });
 
   const overview = document.createElement("section");
   overview.className = "inventory-overview";
 
-  overview.appendChild(buildInventoryHeader(filteredAgents.length));
-  overview.appendChild(buildInventorySummary(filteredAgents));
+  overview.appendChild(buildInventoryHeader(filteredWorkflows.length));
+  overview.appendChild(buildInventorySummary(filteredWorkflows));
 
-  if (!filteredAgents.length) {
+  if (!filteredWorkflows.length) {
     const empty = document.createElement("p");
     empty.className = "muted";
-    empty.textContent = "No agents match the selected filters.";
+    empty.textContent = "No workflows match the selected filters.";
     overview.appendChild(empty);
   } else {
-    overview.appendChild(buildInventoryBoard(filteredAgents));
+    overview.appendChild(buildInventoryBoard(filteredWorkflows));
   }
 
   root.appendChild(overview);
@@ -368,13 +352,13 @@ function buildAgentCatalogSection() {
   return section;
 }
 
-function buildInventoryHeader(agentCount) {
+function buildInventoryHeader(workflowCount) {
   const header = document.createElement("header");
 
   const copyBlock = document.createElement("div");
   copyBlock.innerHTML = `
     <h3>Operational snapshot</h3>
-    <p class="muted">Live signals flowing into mission control.</p>
+    <p class="muted">Live signals from automated and assisted workflows.</p>
   `;
 
   const pillTray = document.createElement("div");
@@ -389,7 +373,7 @@ function buildInventoryHeader(agentCount) {
 
   const total = document.createElement("span");
   total.className = "status-pill green";
-  total.textContent = `${agentCount} agents in view`;
+  total.textContent = `${workflowCount} workflows in view`;
   pillTray.appendChild(total);
 
   header.appendChild(copyBlock);
@@ -397,36 +381,29 @@ function buildInventoryHeader(agentCount) {
   return header;
 }
 
-function buildInventorySummary(filteredAgents) {
+function buildInventorySummary(filteredWorkflows) {
   const summary = document.createElement("div");
   summary.className = "inventory-summary";
 
-  const totalAgents = filteredAgents.length;
-  const activeAgents = filteredAgents.filter((agent) => agent.status === "active").length;
-  const pausedAgents = filteredAgents.filter((agent) => agent.status === "paused").length;
-  const failedAgents = filteredAgents.filter((agent) => agent.status === "failed").length;
+  const totalWorkflows = filteredWorkflows.length;
+  const countsByLane = WORKFLOW_LANES.reduce((acc, lane) => {
+    acc[lane.key] = filteredWorkflows.filter(
+      (workflow) => categorizeWorkflowStatus(workflow.status) === lane.key
+    ).length;
+    return acc;
+  }, {});
 
-  const averageSuccess =
-    totalAgents === 0
-      ? 0
-      : filteredAgents.reduce((acc, agent) => acc + agent.successRate, 0) / totalAgents;
-  const averageAutomation =
-    totalAgents === 0
-      ? 0
-      : filteredAgents.reduce((acc, agent) => acc + agent.automationRate, 0) / totalAgents;
-  const averageLatency =
-    totalAgents === 0
-      ? 0
-      : filteredAgents.reduce((acc, agent) => acc + agent.avgLatency, 0) / totalAgents;
+  const automatedCount = filteredWorkflows.filter((workflow) => workflow.type === "Automated").length;
+  const assistedCount = filteredWorkflows.filter((workflow) => workflow.type === "Assisted").length;
 
   const cards = [
-    { label: "Total agents", value: totalAgents.toString() },
-    { label: "Active", value: activeAgents.toString() },
-    { label: "Paused", value: pausedAgents.toString() },
-    { label: "Failed", value: failedAgents.toString() },
-    { label: "Avg success", value: `${Math.round(averageSuccess * 100)}%` },
-    { label: "Avg automation", value: `${Math.round(averageAutomation * 100)}%` },
-    { label: "Avg latency", value: `${averageLatency.toFixed(1)}s` },
+    { label: "Total workflows", value: totalWorkflows.toString() },
+    ...WORKFLOW_LANES.map((lane) => ({
+      label: lane.label,
+      value: (countsByLane[lane.key] ?? 0).toString(),
+    })),
+    { label: "Automated", value: automatedCount.toString() },
+    { label: "Assisted", value: assistedCount.toString() },
   ];
 
   cards.forEach((card) => {
@@ -441,48 +418,35 @@ function buildInventorySummary(filteredAgents) {
   return summary;
 }
 
-function buildInventoryBoard(filteredAgents) {
+function buildInventoryBoard(filteredWorkflows) {
   const board = document.createElement("div");
   board.className = "inventory-board";
 
-  const laneConfig = [
-    { key: "active", label: "Active", accent: "green" },
-    { key: "paused", label: "Paused", accent: "orange" },
-    { key: "failed", label: "Needs attention", accent: "red" },
-  ];
-
-  const coveredStatuses = new Set(laneConfig.map((lane) => lane.key));
-  const additionalStatuses = Array.from(
-    new Set(filteredAgents.map((agent) => agent.status).filter((status) => !coveredStatuses.has(status)))
-  );
-
-  additionalStatuses.forEach((status) => {
-    laneConfig.push({ key: status, label: status.replace(/\b\w/g, (c) => c.toUpperCase()), accent: "slate" });
-  });
-
-  laneConfig.forEach((lane) => {
+  WORKFLOW_LANES.forEach((lane) => {
     const laneRoot = document.createElement("section");
     laneRoot.className = `inventory-lane accent-${lane.accent}`;
 
     const header = document.createElement("header");
+    const workflowsInLane = filteredWorkflows.filter(
+      (workflow) => categorizeWorkflowStatus(workflow.status) === lane.key
+    );
     header.innerHTML = `
       <h4>${lane.label}</h4>
-      <span class="lane-count">${filteredAgents.filter((agent) => agent.status === lane.key).length}</span>
+      <span class="lane-count">${workflowsInLane.length}</span>
     `;
 
     const body = document.createElement("div");
     body.className = "lane-body";
 
-    const agentsInLane = filteredAgents.filter((agent) => agent.status === lane.key);
-    if (!agentsInLane.length) {
+    if (!workflowsInLane.length) {
       body.classList.add("empty");
       const empty = document.createElement("p");
       empty.className = "muted";
-      empty.textContent = "No agents in this lane.";
+      empty.textContent = "No workflows in this lane.";
       body.appendChild(empty);
     } else {
-      agentsInLane.forEach((agent) => {
-        body.appendChild(buildAgentTile(agent));
+      workflowsInLane.forEach((workflow) => {
+        body.appendChild(buildWorkflowTile(workflow));
       });
     }
 
@@ -494,34 +458,59 @@ function buildInventoryBoard(filteredAgents) {
   return board;
 }
 
-function buildAgentTile(agent) {
+function buildWorkflowTile(workflow) {
   const tile = document.createElement("article");
-  tile.className = "agent-tile";
+  tile.className = "agent-tile workflow-tile";
   tile.tabIndex = 0;
   tile.setAttribute("role", "link");
-  tile.setAttribute("aria-label", `Open ${agent.name}`);
+  tile.setAttribute("aria-label", `Open ${workflow.name}`);
 
   const header = document.createElement("header");
   const titleBlock = document.createElement("div");
   titleBlock.innerHTML = `
-    <h5>${agent.name}</h5>
-    <p>${agent.id} · ${agent.businessUnit}</p>
+    <h5>${workflow.name}</h5>
+    <p>${workflow.id} · ${workflow.type}</p>
   `;
 
   const statusPill = document.createElement("span");
-  statusPill.className = `status-pill ${statusToColor(agent.status)}`;
-  statusPill.textContent = agent.status.toUpperCase();
+  statusPill.className = `status-pill ${statusToColor(workflow.status)}`;
+  statusPill.textContent = workflow.status.toUpperCase();
 
   header.appendChild(titleBlock);
   header.appendChild(statusPill);
 
   const metrics = document.createElement("div");
   metrics.className = "tile-metrics";
-  [
-    { label: "Success", value: `${Math.round(agent.successRate * 100)}%` },
-    { label: "Automation", value: `${Math.round(agent.automationRate * 100)}%` },
-    { label: "Latency", value: `${agent.avgLatency.toFixed(1)}s` },
-  ].forEach((metric) => {
+
+  const metricConfig =
+    workflow.type === "Automated"
+      ? [
+          {
+            label: "Run time",
+            value: workflow.runTime
+              ? `${workflow.runTime.value} ${workflow.runTime.descriptor ?? ""}`.trim()
+              : "—",
+          },
+          { label: "Next run", value: workflow.nextRun ?? "—" },
+          { label: "Last run", value: workflow.lastRun ?? "—" },
+        ]
+      : [
+          {
+            label: "Monthly users",
+            value:
+              workflow.mau !== undefined
+                ? workflow.mau.toLocaleString("en-US")
+                : "—",
+          },
+          {
+            label: "Adoption",
+            value:
+              workflow.adoption !== undefined ? `${workflow.adoption}%` : "—",
+          },
+          { label: "Persona", value: workflow.persona ?? "—" },
+        ];
+
+  metricConfig.forEach((metric) => {
     const metricEl = document.createElement("div");
     metricEl.innerHTML = `
       <span>${metric.label}</span>
@@ -532,22 +521,24 @@ function buildAgentTile(agent) {
 
   const footer = document.createElement("footer");
   footer.innerHTML = `
-    <span class="muted">Owner: ${agent.owner}</span>
-    <a class="ghost-btn" href="agent.html?id=${encodeURIComponent(agent.id)}">Open</a>
+    <span class="muted">${workflow.domain} • ${workflow.owner}</span>
+    <a class="ghost-btn" href="workflow.html?id=${encodeURIComponent(workflow.id)}">Open</a>
   `;
 
   tile.appendChild(header);
   tile.appendChild(metrics);
   tile.appendChild(footer);
 
-  tile.addEventListener("click", () => {
-    window.location.href = `agent.html?id=${encodeURIComponent(agent.id)}`;
-  });
+  const openWorkflow = () => {
+    window.location.href = `workflow.html?id=${encodeURIComponent(workflow.id)}`;
+  };
+
+  tile.addEventListener("click", openWorkflow);
 
   tile.addEventListener("keypress", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      window.location.href = `agent.html?id=${encodeURIComponent(agent.id)}`;
+      openWorkflow();
     }
   });
 

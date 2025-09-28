@@ -1,8 +1,14 @@
 export function statusToColor(status) {
-  switch (status) {
+  const normalized = (status ?? "")
+    .toString()
+    .trim()
+    .toLowerCase();
+
+  switch (normalized) {
     case "active":
     case "running":
     case "completed":
+    case "complete":
     case "resolved":
     case "green":
       return "green";
@@ -13,14 +19,41 @@ export function statusToColor(status) {
     case "pending":
     case "orange":
       return "orange";
-    case "failed":
+    case "requires attention":
+    case "requires-attention":
+    case "awaiting input":
+    case "awaiting-input":
     case "escalated":
+    case "error":
+    case "failed":
     case "red":
     case "critical":
       return "red";
     default:
       return "orange";
   }
+}
+
+export function categorizeWorkflowStatus(status) {
+  const normalized = (status ?? "")
+    .toString()
+    .trim()
+    .toLowerCase();
+
+  if (normalized === "running" || normalized === "active") return "running";
+  if (normalized === "paused") return "paused";
+  if (normalized.startsWith("complete")) return "completed";
+  if (normalized === "requires attention" || normalized === "requires-attention")
+    return "requires-attention";
+  if (
+    normalized === "awaiting input" ||
+    normalized === "awaiting-input" ||
+    normalized === "escalated" ||
+    normalized === "error" ||
+    normalized === "failed"
+  )
+    return "requires-attention";
+  return "requires-attention";
 }
 
 export function guardrailCopy(status) {

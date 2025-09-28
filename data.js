@@ -207,6 +207,17 @@ export const agentCatalog = {
   ],
 };
 
+export const workflows = [
+  ...agentCatalog.automated.map((entry) => ({
+    ...entry,
+    type: "Automated",
+  })),
+  ...agentCatalog.assisted.map((entry) => ({
+    ...entry,
+    type: "Assisted",
+  })),
+];
+
 export const agents = [
   {
     id: "AIOPS-017",
