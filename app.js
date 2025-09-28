@@ -177,6 +177,143 @@ const agents = [
   },
 ];
 
+const agentCatalog = [
+  {
+    title: "Automated Agentic AI Workflows (Background Execution)",
+    description:
+      "Hands-off automations where agents execute end-to-end within defined guardrails.",
+    groups: [
+      {
+        name: "Food & Consumer Apps",
+        items: [
+          {
+            title: "Dynamic Menu Optimization",
+            description:
+              "Agents analyze consumption patterns, dietary needs, waste levels, and supplier availability to automatically update menus daily across sites.",
+          },
+          {
+            title: "Personalized Promotions",
+            description:
+              "AI agents tailor offers to user segments (students, employees, patients) and push them through Everyday/So’Eze, driving adoption and revenue lift.",
+          },
+          {
+            title: "Order Routing & Capacity Management",
+            description:
+              "Agents balance demand across kitchens, kiosks, and delivery partners, adjusting prep schedules to minimize wait times and food waste.",
+          },
+        ],
+      },
+      {
+        name: "Facility Management (FM)",
+        items: [
+          {
+            title: "Predictive Maintenance",
+            description:
+              "Agents monitor IoT sensor data, predict equipment failures, and auto-generate work orders in Service Cloud (Keystone).",
+          },
+          {
+            title: "Energy Optimization",
+            description:
+              "Agents dynamically adjust HVAC, lighting, and cleaning schedules based on occupancy and weather, driving sustainability KPIs.",
+          },
+          {
+            title: "Compliance Automation",
+            description:
+              "AI monitors service data (cleaning, safety checks) and ensures SLA compliance automatically, escalating only exceptions.",
+          },
+        ],
+      },
+      {
+        name: "Workforce & Ops",
+        items: [
+          {
+            title: "Shift Scheduling",
+            description:
+              "Agents forecast demand (e.g., lunch peaks, events), auto-generate optimized rosters, and sync with HR systems.",
+          },
+          {
+            title: "Inventory & Procurement",
+            description:
+              "Agents monitor stock levels, place restock orders, and negotiate prices dynamically across suppliers.",
+          },
+          {
+            title: "Contract Bidding Support",
+            description:
+              "Agents ingest bid requirements and auto-draft Sodexo responses with historical benchmarks and compliance checks.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Assisted Agentic AI (Copilot / Human-in-the-Loop)",
+    description:
+      "Copilots embedded in Sodexo employee and client workflows for decision support.",
+    groups: [
+      {
+        name: "For Onsite Staff & Managers",
+        items: [
+          {
+            title: "Operations Copilot",
+            description:
+              "A ServiceNow/Jira-style console highlighting drivers behind metrics with recommended actions.",
+          },
+          {
+            title: "Menu & Nutrition Copilot",
+            description:
+              "Helps chefs adapt recipes for allergies and dietary needs instantly, checking costs and supplier availability.",
+          },
+          {
+            title: "Contract Copilot",
+            description:
+              "Assists sales with proposals, pulling from case studies, KPIs, and regulatory requirements.",
+          },
+        ],
+      },
+      {
+        name: "For Facility Teams",
+        items: [
+          {
+            title: "Maintenance Copilot",
+            description:
+              "Frontline staff receive guided troubleshooting via AR glasses or mobile apps that auto-update logs.",
+          },
+          {
+            title: "Cleaning & Safety Copilot",
+            description:
+              "Supervisors see instant risk maps highlighting compliance gaps and recommended actions.",
+          },
+        ],
+      },
+      {
+        name: "For Executives & Digital Leaders",
+        items: [
+          {
+            title: "Adoption & ROI Insights",
+            description:
+              "Surfaces which digital solutions drive active users, revenue, and retention by region.",
+          },
+          {
+            title: "Strategic Planning Copilot",
+            description:
+              "Combines financials, adoption, and market data to simulate scenarios like new deployments.",
+          },
+        ],
+      },
+      {
+        name: "For Clients",
+        items: [
+          {
+            title: "Client Portal Copilot",
+            description:
+              "Helps B2B clients monitor site performance, satisfaction, sustainability impact, and costs through natural language queries.",
+          },
+        ],
+      },
+    ],
+  },
+];
+
 const actionQueue = [
   {
     id: "INC-4450",
@@ -511,6 +648,59 @@ function applyAgentFilters(list) {
   });
 }
 
+function buildAgentCatalogSection() {
+  const section = document.createElement("section");
+  section.className = "agent-catalog";
+  section.setAttribute("aria-labelledby", "agent-catalog-heading");
+  section.innerHTML = `
+    <header class="catalog-header">
+      <div>
+        <h3 id="agent-catalog-heading">Agentic AI Catalog</h3>
+        <p class="muted">Explore Sodexo's production-ready automations and guided copilots.</p>
+      </div>
+    </header>
+    <div class="catalog-layout">
+      ${agentCatalog
+        .map(
+          (pillar, pillarIndex) => `
+            <article class="catalog-column" aria-labelledby="pillar-${pillarIndex}">
+              <header>
+                <h4 id="pillar-${pillarIndex}">${pillar.title}</h4>
+                <p class="muted">${pillar.description}</p>
+              </header>
+              <div class="catalog-groups">
+                ${pillar.groups
+                  .map(
+                    (group, groupIndex) => `
+                      <section class="catalog-group" aria-labelledby="pillar-${pillarIndex}-group-${groupIndex}">
+                        <h5 id="pillar-${pillarIndex}-group-${groupIndex}">${group.name}</h5>
+                        <ul>
+                          ${group.items
+                            .map(
+                              (item) => `
+                                <li>
+                                  <strong>${item.title}</strong>
+                                  <p>${item.description}</p>
+                                </li>
+                              `
+                            )
+                            .join("")}
+                        </ul>
+                      </section>
+                    `
+                  )
+                  .join("")}
+              </div>
+            </article>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+
+  return section;
+}
+
 function renderInventoryModule(container) {
   const filteredAgents = applyAgentFilters(agents);
 
@@ -523,6 +713,8 @@ function renderInventoryModule(container) {
     renderAgentPage(container);
     return;
   }
+
+  container.appendChild(buildAgentCatalogSection());
 
   const boardHeader = document.createElement("section");
   boardHeader.className = "inventory-overview";
