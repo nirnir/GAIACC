@@ -1,331 +1,23 @@
+import {
+  copy,
+  agents,
+  actionQueue,
+  insights,
+  recommendations,
+  policies,
+  experiments,
+} from "./data.js";
+import { statusToColor } from "./utils.js";
+
 const state = {
   module: "inventory",
   perspective: "ops",
-  selectedAgent: null,
-  detailView: "profile",
-  agentPage: false,
   filters: {
     status: "all",
     businessUnit: "all",
     risk: "all",
   },
 };
-
-const copy = {
-  inventory: {
-    title: "Inventory Manager",
-    subtitle: "Real-time view of deployed agents, their state, and health.",
-  },
-  hitl: {
-    title: "Human-in-the-Loop Console",
-    subtitle: "Route escalations, manage approvals, and keep SLAs on track.",
-  },
-  insights: {
-    title: "Outcome Insights",
-    subtitle: "Quantify business impact and surface levers for improvement.",
-  },
-  governance: {
-    title: "Governance & Guardrails",
-    subtitle: "Ensure policies travel with agents and every decision is auditable.",
-  },
-  optimization: {
-    title: "Optimization Lab",
-    subtitle: "Experiment, tune, and control cost-quality tradeoffs at scale.",
-  },
-};
-
-const agents = [
-  {
-    id: "AIOPS-017",
-    name: "Revenue Ops Planner",
-    status: "active",
-    businessUnit: "Go-To-Market",
-    owner: "Ops Automation Guild",
-    successRate: 0.94,
-    automationRate: 0.81,
-    avgLatency: 6.2,
-    hoursSaved: 4820,
-    lastIncident: "12d ago",
-    riskLevel: "medium",
-    adoption: "Global Sales",
-    dependencies: {
-      tools: ["Salesforce", "Tableau", "SAP"],
-      connectors: ["Databricks Lakehouse", "Palantir AIP"],
-      policies: ["SOX Controls", "PII Masking"],
-    },
-    guardrails: [
-      { name: "Financial Data Boundary", status: "green" },
-      { name: "Revenue Forecast Review", status: "orange" },
-    ],
-    recentActivity: [
-      "Generated Q4 revenue coverage plan",
-      "Escalated contract anomaly to finance reviewer",
-      "Rolled back retrieval model after canary drift",
-    ],
-  },
-  {
-    id: "CX-204",
-    name: "Customer Care Orchestrator",
-    status: "active",
-    businessUnit: "Customer Experience",
-    owner: "Support Ops",
-    successRate: 0.89,
-    automationRate: 0.74,
-    avgLatency: 3.8,
-    hoursSaved: 6950,
-    lastIncident: "3d ago",
-    riskLevel: "low",
-    adoption: "Tier 1 & 2 Support",
-    dependencies: {
-      tools: ["Zendesk", "Slack", "ServiceNow"],
-      connectors: ["LangSmith", "Mosaic Gateway"],
-      policies: ["GDPR Privacy Pack", "PCI Redaction"],
-    },
-    guardrails: [
-      { name: "EU Data Residency", status: "green" },
-      { name: "Payment Redaction", status: "green" },
-    ],
-    recentActivity: [
-      "Deflected billing ticket with self-service workflow",
-      "Routed outage escalation to on-call engineer",
-      "Captured CSAT feedback into evaluation dataset",
-    ],
-  },
-  {
-    id: "RISK-88",
-    name: "Third-Party Risk Analyst",
-    status: "paused",
-    businessUnit: "Risk & Compliance",
-    owner: "Enterprise Trust",
-    successRate: 0.76,
-    automationRate: 0.52,
-    avgLatency: 12.5,
-    hoursSaved: 1830,
-    lastIncident: "2h ago",
-    riskLevel: "high",
-    adoption: "Vendor Management",
-    dependencies: {
-      tools: ["GRC Vault", "DocuSign"],
-      connectors: ["AI Gateway", "Policy Engine"],
-      policies: ["AI Act Tier 2", "Vendor Risk Guardrails"],
-    },
-    guardrails: [
-      { name: "Sensitive Document Access", status: "red" },
-      { name: "Dual Control", status: "orange" },
-    ],
-    recentActivity: [
-      "Paused after exceeding false positive threshold",
-      "Requested manual review for procurement contract",
-      "Generated audit evidence pack for Q3",
-    ],
-  },
-  {
-    id: "SUPPLY-61",
-    name: "Supply Chain Navigator",
-    status: "active",
-    businessUnit: "Operations",
-    owner: "Fulfillment PMO",
-    successRate: 0.91,
-    automationRate: 0.68,
-    avgLatency: 8.4,
-    hoursSaved: 3810,
-    lastIncident: "7d ago",
-    riskLevel: "medium",
-    adoption: "Global Logistics",
-    dependencies: {
-      tools: ["SAP IBP", "Snowflake"],
-      connectors: ["Mosaic Gateway", "Vertex Forecast API"],
-      policies: ["Export Control", "Supplier Compliance"],
-    },
-    guardrails: [
-      { name: "Cold Chain Policy", status: "green" },
-      { name: "Supplier Risk", status: "green" },
-    ],
-    recentActivity: [
-      "Predicted port congestion impact for APAC",
-      "Triggered alternate route automation",
-      "Logged scenario to optimization notebook",
-    ],
-  },
-  {
-    id: "HR-142",
-    name: "Talent Mobility Advisor",
-    status: "failed",
-    businessUnit: "People",
-    owner: "HR Innovation",
-    successRate: 0.63,
-    automationRate: 0.41,
-    avgLatency: 5.9,
-    hoursSaved: 940,
-    lastIncident: "12m ago",
-    riskLevel: "medium",
-    adoption: "Corporate HR",
-    dependencies: {
-      tools: ["Workday", "Greenhouse"],
-      connectors: ["AI Gateway", "Employee Graph"],
-      policies: ["PII Safe Handling", "Bias Monitoring"],
-    },
-    guardrails: [
-      { name: "Bias Monitoring", status: "red" },
-      { name: "PII Masking", status: "orange" },
-    ],
-    recentActivity: [
-      "Failed to complete internal transfer recommendation",
-      "Escalated to HRBP for manual approval",
-      "Opened eval notebook for fairness regression",
-    ],
-  },
-];
-
-const actionQueue = [
-  {
-    id: "INC-4450",
-    title: "Procurement Contract Review",
-    summary: "Vendor clause flagged as ambiguous. Needs legal validation before execution.",
-    status: "pending",
-    sla: "02:15",
-    businessUnit: "Risk & Compliance",
-    workflow: "Third-Party Risk Analyst",
-    urgency: "high",
-  },
-  {
-    id: "INC-4412",
-    title: "Customer Refund Escalation",
-    summary: "High value customer requested manual override for refund exception.",
-    status: "pending",
-    sla: "00:42",
-    businessUnit: "Customer Experience",
-    workflow: "Customer Care Orchestrator",
-    urgency: "critical",
-  },
-  {
-    id: "INC-4390",
-    title: "AI Policy Drift",
-    summary: "Policy pack mismatch detected between staging and production gateways.",
-    status: "escalated",
-    sla: "04:20",
-    businessUnit: "Platform",
-    workflow: "Gateway Governance",
-    urgency: "medium",
-  },
-  {
-    id: "INC-4302",
-    title: "Forecast Accuracy Regression",
-    summary: "A/B test variant B regressed cost-to-serve by 6%.",
-    status: "investigating",
-    sla: "08:00",
-    businessUnit: "Operations",
-    workflow: "Supply Chain Navigator",
-    urgency: "medium",
-  },
-  {
-    id: "INC-4220",
-    title: "Successful Automation Review",
-    summary: "Bulk billing adjustments auto-approved with zero escalations for 48h.",
-    status: "completed",
-    sla: "--",
-    businessUnit: "Finance",
-    workflow: "Revenue Ops Planner",
-    urgency: "low",
-  },
-];
-
-const insights = {
-  ops: [
-    { label: "Autonomy Rate", value: "78%", trend: "+6.2% vs last month" },
-    { label: "Average Time Saved", value: "11.4 hrs/task", trend: "+1.8 hrs" },
-    { label: "Escalation MTTR", value: "34 min", trend: "-12 min" },
-    { label: "Coverage", value: "146 agents", trend: "+18 onboarded" },
-  ],
-  exec: [
-    { label: "Hours Returned to Business", value: "38,420", trend: "+4,120 YoY" },
-    { label: "Net Cost Avoidance", value: "$7.9M", trend: "+$900k QoQ" },
-    { label: "CSAT Lift", value: "+9.4 pts", trend: "+1.1 pts" },
-    { label: "Adoption Velocity", value: "21 new teams", trend: "+5 vs target" },
-  ],
-  security: [
-    { label: "Policy Coverage", value: "98.4%", trend: "+0.8%" },
-    { label: "High Risk Agents", value: "4", trend: "-2 vs last week" },
-    { label: "Audit Evidence Packs", value: "27 ready", trend: "GDPR, HIPAA" },
-    { label: "Incident Containment", value: "< 6 min", trend: "SOAR auto-closure" },
-  ],
-};
-
-const recommendations = [
-  {
-    title: "Promote Variant B for Customer Care",
-    impact: "+4.2% FCR / -3% cost",
-    rationale: "Lang model swap in canary shows consistent quality uplift with lower token spend.",
-    owner: "Support Ops",
-    due: "Ready for rollout",
-  },
-  {
-    title: "Enable Retrieval Cache for Revenue Ops",
-    impact: "-$12k monthly / latency -18%",
-    rationale: "High repeat queries detected on fiscal planning scenarios.",
-    owner: "Ops Automation Guild",
-    due: "Pilot scheduled",
-  },
-  {
-    title: "Tighten Vendor Risk Guardrail",
-    impact: "Reduce false positives by 22%",
-    rationale: "Policy evaluation shows over-triggering on low risk suppliers.",
-    owner: "Enterprise Trust",
-    due: "Needs legal review",
-  },
-];
-
-const policies = [
-  {
-    name: "PII Safe Handling",
-    coverage: "Global",
-    status: "green",
-    description: "Auto-redaction enforced across CRM, ERP, and support transcripts.",
-    lastAudit: "6h ago",
-  },
-  {
-    name: "GDPR Residency",
-    coverage: "EU Region",
-    status: "green",
-    description: "Geo-fenced storage and inference enforced via AI Gateway policies.",
-    lastAudit: "2h ago",
-  },
-  {
-    name: "Bias Monitoring",
-    coverage: "People Ops",
-    status: "orange",
-    description: "Drift detected on fairness metrics for Talent Mobility Advisor.",
-    lastAudit: "20m ago",
-  },
-  {
-    name: "Incident Response",
-    coverage: "Enterprise",
-    status: "green",
-    description: "SOAR playbooks executed with 99% SLA adherence.",
-    lastAudit: "11h ago",
-  },
-];
-
-const experiments = [
-  {
-    name: "Support Agent Model Swap",
-    status: "Running",
-    detail: "A/B testing GPT-4o vs. Claude Opus for refund workflows.",
-    completion: 64,
-  },
-  {
-    name: "Revenue Plan Strategy",
-    status: "Canary",
-    detail: "Tool sequencing variant with scenario caching enabled.",
-    completion: 32,
-  },
-  {
-    name: "Risk Policy Tuning",
-    status: "Design",
-    detail: "Notebook-driven evals on supplier onboarding accuracy.",
-    completion: 18,
-  },
-];
 
 const telemetry = [
   "Ops | Supply Chain Navigator latency spike mitigated via cache warm-up.",
@@ -364,9 +56,6 @@ function wireNavigation() {
     button.addEventListener("click", () => {
       if (button.dataset.module === state.module) return;
       state.module = button.dataset.module;
-      state.detailView = "profile";
-      state.agentPage = false;
-      state.selectedAgent = null;
       document
         .querySelectorAll(".nav-item")
         .forEach((item) => item.classList.remove("active"));
@@ -480,22 +169,16 @@ function renderFilters() {
 
   panel.querySelector("#status-filter").addEventListener("change", (event) => {
     state.filters.status = event.target.value;
-    state.agentPage = false;
-    state.selectedAgent = null;
     renderModule();
   });
 
   panel.querySelector("#bu-filter").addEventListener("change", (event) => {
     state.filters.businessUnit = event.target.value;
-    state.agentPage = false;
-    state.selectedAgent = null;
     renderModule();
   });
 
   panel.querySelector("#risk-filter").addEventListener("change", (event) => {
     state.filters.risk = event.target.value;
-    state.agentPage = false;
-    state.selectedAgent = null;
     renderModule();
   });
 }
@@ -513,16 +196,6 @@ function applyAgentFilters(list) {
 
 function renderInventoryModule(container) {
   const filteredAgents = applyAgentFilters(agents);
-
-  if (state.agentPage && (!state.selectedAgent || !filteredAgents.find((agent) => agent.id === state.selectedAgent))) {
-    state.agentPage = false;
-    state.selectedAgent = filteredAgents[0]?.id ?? null;
-  }
-
-  if (state.agentPage && state.selectedAgent) {
-    renderAgentPage(container);
-    return;
-  }
 
   const boardHeader = document.createElement("section");
   boardHeader.className = "inventory-overview";
@@ -656,6 +329,8 @@ function renderInventoryModule(container) {
 function buildAgentTile(agent) {
   const card = document.createElement("article");
   card.className = `agent-tile risk-${agent.riskLevel}`;
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
   card.innerHTML = `
     <header>
       <div>
@@ -684,215 +359,24 @@ function buildAgentTile(agent) {
     </footer>
   `;
 
+  const openAgent = () => {
+    window.location.href = `agent.html?id=${encodeURIComponent(agent.id)}`;
+  };
+
   card.querySelector(".tile-open").addEventListener("click", (event) => {
     event.stopPropagation();
-    state.selectedAgent = agent.id;
-    state.detailView = "profile";
-    state.agentPage = true;
-    renderModule();
+    openAgent();
   });
 
-  card.addEventListener("click", () => {
-    state.selectedAgent = agent.id;
-    state.detailView = "profile";
-    state.agentPage = true;
-    renderModule();
+  card.addEventListener("click", openAgent);
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openAgent();
+    }
   });
 
   return card;
-}
-
-function renderAgentPage(container) {
-  const agent = agents.find((item) => item.id === state.selectedAgent);
-  if (!agent) {
-    state.agentPage = false;
-    renderInventoryModule(container);
-    return;
-  }
-
-  const page = document.createElement("section");
-  page.className = "agent-page";
-  page.innerHTML = `
-    <button class="ghost-btn back-button" type="button">← Back to inventory</button>
-    <header class="agent-hero">
-      <div>
-        <span class="muted">${agent.id}</span>
-        <h3>${agent.name}</h3>
-        <div class="agent-hero-meta">
-          <span>${agent.businessUnit}</span>
-          <span>${agent.owner}</span>
-          <span class="risk-chip risk-${agent.riskLevel}">Risk: ${agent.riskLevel.toUpperCase()}</span>
-        </div>
-      </div>
-      <div class="agent-hero-actions">
-        <span class="status-pill ${statusToColor(agent.status)}">${agent.status.toUpperCase()}</span>
-        <div class="hero-buttons">
-          <button class="primary-btn" type="button">Launch Playbook</button>
-          <button class="ghost-btn" type="button">Pause Agent</button>
-          <button class="ghost-btn" type="button">Escalate</button>
-        </div>
-      </div>
-    </header>
-    <section class="agent-metric-band">
-      ${[
-        { label: "Success Rate", value: `${Math.round(agent.successRate * 100)}%` },
-        { label: "Automation", value: `${Math.round(agent.automationRate * 100)}%` },
-        { label: "Average Latency", value: `${agent.avgLatency}s` },
-        { label: "Hours Saved", value: agent.hoursSaved.toLocaleString() },
-        { label: "Last Incident", value: agent.lastIncident },
-      ]
-        .map(
-          (item) => `
-            <article>
-              <span>${item.label}</span>
-              <strong>${item.value}</strong>
-            </article>
-          `
-        )
-        .join("")}
-    </section>
-    <div class="agent-page-grid">
-      <section class="agent-core">
-        <nav class="detail-switcher">
-          <button class="ghost-btn ${state.detailView === "profile" ? "active" : ""}" data-view="profile" type="button">Run Log</button>
-          <button class="ghost-btn ${state.detailView === "dependencies" ? "active" : ""}" data-view="dependencies" type="button">Dependency Graph</button>
-          <button class="ghost-btn ${state.detailView === "guardrails" ? "active" : ""}" data-view="guardrails" type="button">Guardrails</button>
-        </nav>
-        <div class="detail-body" id="detail-body"></div>
-      </section>
-      <aside class="agent-side">
-        <article class="detail-card">
-          <h4>Operational Checklist</h4>
-          <ul class="checklist">
-            <li>Blast radius reviewed</li>
-            <li>Guardrail pack synced</li>
-            <li>Escalation rota acknowledged</li>
-            <li>Telemetry routed to observability hub</li>
-          </ul>
-        </article>
-        <article class="detail-card">
-          <h4>Recent Activity</h4>
-          <div class="timeline">${agent.recentActivity
-            .map((entry) => `<div class="timeline-item">${entry}</div>`)
-            .join("")}</div>
-        </article>
-      </aside>
-    </div>
-  `;
-
-  page.querySelector(".back-button").addEventListener("click", () => {
-    state.agentPage = false;
-    renderModule();
-  });
-
-  page.querySelectorAll(".detail-switcher .ghost-btn").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.detailView = button.dataset.view;
-      renderAgentPage(container);
-    });
-  });
-
-  container.appendChild(page);
-
-  const body = page.querySelector("#detail-body");
-  if (state.detailView === "dependencies") {
-    body.innerHTML = renderDependencies(agent);
-  } else if (state.detailView === "guardrails") {
-    body.innerHTML = renderGuardrails(agent.guardrails);
-  } else {
-    body.innerHTML = renderRunLog(agent.recentActivity);
-  }
-}
-
-function renderDependencies(agent) {
-  return `
-    <div class="detail-card nested">
-      <h4>Dependencies</h4>
-      <p class="muted">Visualize upstream tools and guardrails before deploying changes.</p>
-      <div class="badge-grid">
-        ${agent.dependencies.tools.map((tool) => `<span class="chip">🛠 ${tool}</span>`).join("")}
-      </div>
-      <div class="badge-grid">
-        ${agent.dependencies.connectors
-          .map((connector) => `<span class="chip">🔌 ${connector}</span>`)
-          .join("")}
-      </div>
-      <div class="badge-grid">
-        ${agent.dependencies.policies.map((policy) => `<span class="chip">🛡 ${policy}</span>`).join("")}
-      </div>
-      <p class="muted">Use blast radius analysis before editing shared resources.</p>
-    </div>
-  `;
-}
-
-function renderGuardrails(items) {
-  return `
-    <div class="detail-card nested">
-      <h4>Guardrail Health</h4>
-      <div class="policy-grid">
-        ${items
-          .map(
-            (item) => `
-              <div class="policy-card">
-                <header>
-                  <strong>${item.name}</strong>
-                  <span class="status-pill ${statusToColor(item.status)}">${item.status.toUpperCase()}</span>
-                </header>
-                <p class="muted">${guardrailCopy(item.status)}</p>
-              </div>
-            `
-          )
-          .join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderRunLog(activity) {
-  return `
-    <div class="detail-card nested">
-      <h4>Latest Activity</h4>
-      <div class="timeline">
-        ${activity.map((entry) => `<div class="timeline-item">${entry}</div>`).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function statusToColor(status) {
-  switch (status) {
-    case "active":
-    case "running":
-    case "completed":
-    case "resolved":
-      return "green";
-    case "paused":
-    case "canary":
-    case "design":
-    case "investigating":
-    case "pending":
-    case "orange":
-      return "orange";
-    case "failed":
-    case "escalated":
-    case "red":
-      return "red";
-    default:
-      return "orange";
-  }
-}
-
-function guardrailCopy(status) {
-  switch (status) {
-    case "green":
-      return "Operating within expected thresholds.";
-    case "orange":
-      return "Degradation detected. Review evaluation notebook.";
-    case "red":
-      return "Policy violation. HITL approval required before restart.";
-    default:
-      return "Monitoring.";
-  }
 }
 
 function renderHitlModule(container) {
@@ -1124,7 +608,7 @@ style.textContent = `
   .experiment-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .progress { flex: 1; height: 6px; border-radius: 999px; background: rgba(37, 99, 235, 0.12); overflow: hidden; }
   .progress-bar { height: 100%; background: linear-gradient(90deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.9)); }
-  .agent-card.active-selection { outline: 1px solid rgba(37, 99, 235, 0.35); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
+  .agent-tile:hover, .agent-tile:focus-within { outline: 1px solid rgba(37, 99, 235, 0.35); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
   #filter-panel { display: grid; gap: 12px; }
   .filter { display: grid; gap: 6px; font-size: 0.85rem; color: var(--text-muted); }
   .filter select { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 8px; color: var(--text-primary); }
