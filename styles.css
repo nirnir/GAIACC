@@ -701,6 +701,7 @@ td .workflow-cell {
   padding: 20px;
   display: grid;
   gap: 18px;
+  align-content: start;
   position: relative;
 }
 
@@ -749,6 +750,7 @@ td .workflow-cell {
 .lane-body {
   display: grid;
   gap: 14px;
+  align-content: start;
 }
 
 .lane-body.empty {
@@ -1639,6 +1641,7 @@ td .workflow-cell {
   padding: 18px;
   display: grid;
   gap: 14px;
+  align-content: start;
   box-shadow: var(--shadow);
 }
 
