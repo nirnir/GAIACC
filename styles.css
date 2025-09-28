@@ -240,6 +240,11 @@ body {
   gap: 24px;
 }
 
+.catalog-group {
+  display: grid;
+  gap: 12px;
+}
+
 .catalog-header h3 {
   margin: 0;
   font-size: 1.3rem;
@@ -277,7 +282,8 @@ body {
   border-radius: var(--radius-md);
   border: 1px solid rgba(37, 99, 235, 0.12);
   background: var(--surface-alt);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .catalog-table {
