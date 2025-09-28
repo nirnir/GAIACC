@@ -657,10 +657,12 @@ td .workflow-cell {
   gap: 16px;
 }
 
-.inventory-pills {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+.inventory-overview header p {
+  margin: 8px 0 0;
+}
+
+.inventory-overview header .inventory-total-note {
+  margin-top: 4px;
 }
 
 .inventory-summary {
