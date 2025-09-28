@@ -8,7 +8,12 @@ import {
   experiments,
   workflows,
 } from "./data.js";
-import { statusToColor, categorizeWorkflowStatus } from "./utils.js";
+import {
+  statusToColor,
+  categorizeWorkflowStatus,
+  formatTriggerLabel,
+  formatRunCadenceValue,
+} from "./utils.js";
 
 const state = {
   module: "inventory",
@@ -312,7 +317,7 @@ function buildAgentCatalogSection() {
           <th scope="row">
             <div class="workflow-cell">
               <span class="workflow-id">${entry.id}</span>
-              <span class="workflow-name">${entry.name}</span>
+              <a class="workflow-link workflow-name" href="workflow.html?id=${encodeURIComponent(entry.id)}">${entry.name}</a>
             </div>
           </th>
           <td data-label="Domain / Owner">
@@ -333,7 +338,7 @@ function buildAgentCatalogSection() {
           <th scope="row">
             <div class="workflow-cell">
               <span class="workflow-id">${entry.id}</span>
-              <span class="workflow-name">${entry.name}</span>
+              <a class="workflow-link workflow-name" href="workflow.html?id=${encodeURIComponent(entry.id)}">${entry.name}</a>
             </div>
           </th>
           <td data-label="Monthly Active Users (MAU)">${createMetricPill(mau, "users")}</td>
@@ -582,10 +587,10 @@ function buildLaneOverflowNotice(extraCount) {
 
 function renderHitlModule(root) {
   const layout = document.createElement("div");
-  layout.className = "queue-layout";
+  layout.className = "queue-layout hitl-workflow-layout";
 
   const laneMap = [
-    { key: "pending", label: "Pending" },
+    { key: "pending", label: "Pending review" },
     { key: "investigating", label: "Investigating" },
     { key: "escalated", label: "Escalated" },
     { key: "completed", label: "Completed" },
@@ -595,14 +600,13 @@ function renderHitlModule(root) {
     const column = document.createElement("section");
     column.className = "queue-column";
 
-    const header = document.createElement("header");
     const items = actionQueue.filter((item) => item.status === lane.key);
-    header.innerHTML = `
-      <span>${lane.label}</span>
-      <span class="queue-count">${items.length}</span>
+    column.innerHTML = `
+      <header>
+        <span>${lane.label}</span>
+        <span class="queue-count">${items.length}</span>
+      </header>
     `;
-
-    column.appendChild(header);
 
     if (!items.length) {
       const empty = document.createElement("p");
@@ -620,25 +624,110 @@ function renderHitlModule(root) {
 }
 
 function buildQueueCard(item) {
+  const workflow = workflows.find((wf) => wf.id === item.workflowId);
   const card = document.createElement("article");
-  card.className = "queue-card";
+  card.className = "queue-card hitl-workflow-card";
+
+  if (workflow) {
+    card.tabIndex = 0;
+    card.setAttribute("role", "link");
+    card.setAttribute("aria-label", `Open ${workflow.name} workflow details`);
+  }
+
+  const workflowStatus = workflow?.status ?? item.status;
+  const metrics = [];
+
+  if (workflow) {
+    if (workflow.type === "Automated") {
+      metrics.push(
+        { label: "Trigger", value: formatTriggerLabel(workflow.trigger) },
+        { label: "Cadence", value: formatRunCadenceValue(workflow) },
+        { label: "Next run", value: workflow.nextRun ?? "—" }
+      );
+    } else {
+      metrics.push(
+        {
+          label: "Monthly users",
+          value:
+            workflow.mau !== undefined
+              ? workflow.mau.toLocaleString("en-US")
+              : "—",
+        },
+        {
+          label: "Adoption",
+          value:
+            workflow.adoption !== undefined ? `${workflow.adoption}%` : "—",
+        },
+        { label: "Persona", value: workflow.persona ?? "—" }
+      );
+    }
+  }
+
   card.innerHTML = `
     <header>
       <div>
-        <h3 class="queue-title">${item.title}</h3>
-        <p class="queue-meta">${item.workflow} • ${item.businessUnit}</p>
+        <h3 class="queue-title">
+          ${
+            workflow
+              ? `<a class="workflow-link" href="workflow.html?id=${encodeURIComponent(
+                  workflow.id
+                )}">${workflow.name}</a>`
+              : item.title
+          }
+        </h3>
+        <p class="queue-meta">
+          ${workflow ? `${workflow.id} • ${workflow.type}` : item.workflow}
+        </p>
       </div>
-      <div>
-        <span class="status-pill ${statusToColor(item.status)}">${item.status.toUpperCase()}</span>
+      <div class="queue-status-group">
+        <span class="status-pill ${statusToColor(workflowStatus)}">${workflowStatus.toUpperCase()}</span>
         <span class="queue-sla">SLA ${item.sla}</span>
       </div>
     </header>
     <p class="queue-description">${item.summary}</p>
+    ${
+      metrics.length
+        ? `<div class="queue-insights">${metrics
+            .map(
+              (metric) => `
+                <div>
+                  <span>${metric.label}</span>
+                  <strong>${metric.value}</strong>
+                </div>
+              `
+            )
+            .join("")}</div>`
+        : ""
+    }
     <footer>
-      <button class="ghost-btn resolve-btn" type="button">Resolve</button>
-      <button class="ghost-btn escalate-btn" type="button">Escalate</button>
+      <span class="muted">${item.businessUnit}</span>
+      ${
+        workflow
+          ? `<span class="muted">${workflow.domain ?? "—"} • ${workflow.owner ?? "—"}</span>`
+          : ""
+      }
     </footer>
   `;
+
+  if (workflow) {
+    const openWorkflow = () => {
+      window.location.href = `workflow.html?id=${encodeURIComponent(workflow.id)}`;
+    };
+
+    card.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target instanceof HTMLAnchorElement) return;
+      openWorkflow();
+    });
+
+    card.addEventListener("keypress", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openWorkflow();
+      }
+    });
+  }
+
   return card;
 }
 

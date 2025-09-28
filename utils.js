@@ -56,6 +56,18 @@ export function categorizeWorkflowStatus(status) {
   return "requires-attention";
 }
 
+export function formatTriggerLabel(trigger) {
+  if (!trigger) return "—";
+  if (typeof trigger === "string") return trigger;
+  return trigger.label ?? trigger.type ?? "—";
+}
+
+export function formatRunCadenceValue(workflow) {
+  if (!workflow || !workflow.runTime) return "—";
+  const descriptor = workflow.runTime.descriptor ? ` ${workflow.runTime.descriptor}` : "";
+  return `${workflow.runTime.value}${descriptor}`;
+}
+
 export function guardrailCopy(status) {
   switch (status) {
     case "green":
