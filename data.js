@@ -1,0 +1,885 @@
+export const copy = {
+  inventory: {
+    title: "Inventory Manager",
+    subtitle: "Real-time view of deployed agents, their state, and health.",
+  },
+  hitl: {
+    title: "Human-in-the-Loop Console",
+    subtitle: "Route escalations, manage approvals, and keep SLAs on track.",
+  },
+  insights: {
+    title: "Outcome Insights",
+    subtitle: "Quantify business impact and surface levers for improvement.",
+  },
+  governance: {
+    title: "Governance & Guardrails",
+    subtitle: "Ensure policies travel with agents and every decision is auditable.",
+  },
+  optimization: {
+    title: "Optimization Lab",
+    subtitle: "Experiment, tune, and control cost-quality tradeoffs at scale.",
+  },
+};
+
+export const agents = [
+  {
+    id: "AIOPS-017",
+    name: "Revenue Ops Planner",
+    status: "active",
+    businessUnit: "Go-To-Market",
+    owner: "Ops Automation Guild",
+    successRate: 0.94,
+    automationRate: 0.81,
+    avgLatency: 6.2,
+    hoursSaved: 4820,
+    lastIncident: "12d ago",
+    riskLevel: "medium",
+    adoption: "Global Sales",
+    dependencies: {
+      tools: ["Salesforce", "Tableau", "SAP"],
+      connectors: ["Databricks Lakehouse", "Palantir AIP"],
+      policies: ["SOX Controls", "PII Masking"],
+    },
+    guardrails: [
+      { name: "Financial Data Boundary", status: "green" },
+      { name: "Revenue Forecast Review", status: "orange" },
+    ],
+    recentActivity: [
+      "Generated Q4 revenue coverage plan",
+      "Escalated contract anomaly to finance reviewer",
+      "Rolled back retrieval model after canary drift",
+    ],
+    hitl: {
+      queue: [
+        {
+          id: "HITL-9043",
+          title: "Approve LATAM scenario override",
+          description:
+            "Forecast variance above 8% for LATAM enterprise deals requires controller review before publishing.",
+          sla: "1h 20m",
+          assignee: "Finance Controller",
+          channel: "Slack",
+          status: "pending",
+        },
+        {
+          id: "HITL-9051",
+          title: "Validate token spend budget",
+          description:
+            "Model requested budget uplift of $18k for GPT-4o usage in Q3 acceleration program.",
+          sla: "3h 15m",
+          assignee: "Ops Automation Guild",
+          channel: "Email",
+          status: "pending",
+        },
+        {
+          id: "HITL-8991",
+          title: "Investigate procurement anomaly",
+          description:
+            "Supplier onboarding stalled after policy guardrail flagged missing compliance attachment.",
+          sla: "45m",
+          assignee: "Enterprise Trust",
+          channel: "ServiceNow",
+          status: "investigating",
+        },
+      ],
+      decisionLog: [
+        "2024-07-17 08:42 • Finance approved scenario variant C",
+        "2024-07-16 17:10 • Controller requested human review on procurement anomaly",
+        "2024-07-15 12:05 • Ops accepted automated budget rebalancing recommendation",
+      ],
+      playbooks: [
+        "Scenario override reviewer workflow",
+        "Token spend budget guardrail",
+        "Procurement anomaly warm handoff",
+      ],
+    },
+    performance: {
+      metrics: [
+        { label: "Successful Runs (7d)", value: "486", trend: "+8% vs. prior" },
+        { label: "Human Reviews", value: "14", trend: "-3 vs. last week" },
+        { label: "Avg. Cycle Time", value: "5.8 min", trend: "-0.6 min" },
+        { label: "Token Spend", value: "$4.6k", trend: "+$180" },
+      ],
+      errorBreakdown: [
+        { label: "Policy Violations", count: 2, change: "-1 vs. last week" },
+        { label: "Data Quality Checks", count: 5, change: "+1" },
+        { label: "External API Failures", count: 3, change: "Stable" },
+      ],
+      incidents: [
+        {
+          timestamp: "2024-07-17 07:55",
+          summary: "Guardrail intercepted regional override and requested manual review.",
+          resolution: "Finance controller approved after verifying upstream CRM delta.",
+        },
+        {
+          timestamp: "2024-07-14 21:20",
+          summary: "Databricks ingestion delay increased latency for nightly scenario runs.",
+          resolution: "Cache pre-warming policy applied and run rescheduled.",
+        },
+        {
+          timestamp: "2024-07-13 10:42",
+          summary: "Token budget threshold reached for EMEA pipeline expansion.",
+          resolution: "Ops authorized additional spend with monitoring flag.",
+        },
+      ],
+      evaluationNotes: [
+        "QLoRA fine-tune continues outperforming baseline at 1.9% lower cost-per-run.",
+        "Need deeper coverage on procurement datasets for vendor onboarding edge cases.",
+        "Introduce shared evaluation harness with Sales Ops to align on success definition.",
+      ],
+    },
+    insights: {
+      narrative:
+        "Revenue variance has stabilized, but human approvals are clustered around procurement anomalies. Focus on upstream data hygiene to keep automation rate climbing.",
+      actions: [
+        {
+          title: "Publish procurement anomaly checklist",
+          description: "Codify finance reviewer steps into shared Confluence playbook and sync to agent.",
+          impact: "Reduce manual review time by 18%",
+          owner: "Enterprise Trust",
+          due: "This week",
+          status: "In Flight",
+        },
+        {
+          title: "Enable retrieval cache for repeated forecast queries",
+          description: "Cache top 50 scenario prompts to trim Databricks reads on peak days.",
+          impact: "Save ~$1.8k monthly",
+          owner: "Ops Automation Guild",
+          due: "Next sprint",
+          status: "Ready",
+        },
+        {
+          title: "Pair with GTM analytics on shared eval set",
+          description: "Align fairness and accuracy metrics for expansion into channel sales.",
+          impact: "Unlock 3 new workflows",
+          owner: "GTM Analytics",
+          due: "End of month",
+          status: "Planned",
+        },
+      ],
+      opportunities: [
+        { label: "Scenario coverage", detail: "Add FY25 partner tier logic to reduce overrides." },
+        { label: "Data freshness", detail: "Schedule CRM ingestion monitor at 30-minute cadence." },
+        { label: "Playbook reuse", detail: "Share procurement handoff template with Supply Chain Navigator." },
+      ],
+    },
+  },
+  {
+    id: "CX-204",
+    name: "Customer Care Orchestrator",
+    status: "active",
+    businessUnit: "Customer Experience",
+    owner: "Support Ops",
+    successRate: 0.89,
+    automationRate: 0.74,
+    avgLatency: 3.8,
+    hoursSaved: 6950,
+    lastIncident: "3d ago",
+    riskLevel: "low",
+    adoption: "Tier 1 & 2 Support",
+    dependencies: {
+      tools: ["Zendesk", "Slack", "ServiceNow"],
+      connectors: ["LangSmith", "Mosaic Gateway"],
+      policies: ["GDPR Privacy Pack", "PCI Redaction"],
+    },
+    guardrails: [
+      { name: "EU Data Residency", status: "green" },
+      { name: "Payment Redaction", status: "green" },
+    ],
+    recentActivity: [
+      "Deflected billing ticket with self-service workflow",
+      "Routed outage escalation to on-call engineer",
+      "Captured CSAT feedback into evaluation dataset",
+    ],
+    hitl: {
+      queue: [
+        {
+          id: "HITL-8120",
+          title: "VIP refund approval",
+          description:
+            "High-value customer requested manual override for refund outside policy window.",
+          sla: "35m",
+          assignee: "Regional Support Lead",
+          channel: "ServiceNow",
+          status: "pending",
+        },
+        {
+          id: "HITL-8109",
+          title: "Language handoff",
+          description:
+            "Conversation detected sentiment drift in Japanese; requires bilingual specialist review.",
+          sla: "1h 10m",
+          assignee: "APAC Support Desk",
+          channel: "Slack",
+          status: "pending",
+        },
+        {
+          id: "HITL-8066",
+          title: "PCI evidence confirmation",
+          description:
+            "Agent auto-redacted card details; compliance team to confirm transcript for quarterly audit.",
+          sla: "6h",
+          assignee: "Compliance QA",
+          channel: "Jira",
+          status: "completed",
+        },
+      ],
+      decisionLog: [
+        "2024-07-17 09:14 • VIP refund granted with exception flag",
+        "2024-07-16 19:40 • Compliance QA closed PCI review with no findings",
+        "2024-07-15 08:05 • Shift lead approved language handoff to specialist queue",
+      ],
+      playbooks: [
+        "Refund exception routing",
+        "Live sentiment intervention",
+        "PCI audit preparation",
+      ],
+    },
+    performance: {
+      metrics: [
+        { label: "Deflection Rate", value: "64%", trend: "+5 pts" },
+        { label: "Average Handle Time", value: "2.9 min", trend: "-0.4 min" },
+        { label: "Escalations", value: "22", trend: "-6" },
+        { label: "CSAT", value: "4.7 / 5", trend: "+0.3" },
+      ],
+      errorBreakdown: [
+        { label: "Policy Exceptions", count: 3, change: "Stable" },
+        { label: "Tool Failures", count: 1, change: "-2" },
+        { label: "Language Mismatches", count: 4, change: "-1" },
+      ],
+      incidents: [
+        {
+          timestamp: "2024-07-16 18:50",
+          summary: "VIP refund flagged due to contract exception rules.",
+          resolution: "Manual approval recorded and playbook updated with new clause.",
+        },
+        {
+          timestamp: "2024-07-15 06:30",
+          summary: "Japanese sentiment model drifted after rollout of new taxonomy.",
+          resolution: "Fallback to human specialist for 12 hours while model retrained.",
+        },
+        {
+          timestamp: "2024-07-12 23:18",
+          summary: "Zendesk API rate limits slowed queue updates.",
+          resolution: "Enabled adaptive polling schedule during incident window.",
+        },
+      ],
+      evaluationNotes: [
+        "Tier 3 workflows ready for automation once legal approves new knowledge articles.",
+        "Need coverage for weekend hours when bilingual specialists are offline.",
+        "Consider adding translation confidence metric to dashboard.",
+      ],
+    },
+    insights: {
+      narrative:
+        "Customer Care Orchestrator continues to reduce handle time. Human reviews mostly concern policy exceptions that can be codified into new guardrails.",
+      actions: [
+        {
+          title: "Automate VIP refund guardrail",
+          description: "Convert exception criteria into structured policy so only approvals require human touch.",
+          impact: "Cut VIP queue by 40%",
+          owner: "Support Ops",
+          due: "48 hours",
+          status: "In Review",
+        },
+        {
+          title: "Expand bilingual coverage",
+          description: "Staff APAC specialists for weekend handoffs and add fallback vendor for after-hours.",
+          impact: "Remove 3 manual escalations per day",
+          owner: "CX Workforce Mgmt",
+          due: "Next staffing cycle",
+          status: "Planned",
+        },
+        {
+          title: "Launch CSAT-driven experiment",
+          description: "Run 2-week A/B test on proactive knowledge suggestions in self-service flows.",
+          impact: "+1.5 CSAT target",
+          owner: "Knowledge Ops",
+          due: "Aug 1",
+          status: "Scheduled",
+        },
+      ],
+      opportunities: [
+        { label: "Knowledge freshness", detail: "Sync release notes into self-service flows daily." },
+        { label: "Compliance automation", detail: "Auto-attach PCI transcripts to quarterly audit packs." },
+        { label: "Sentiment guardrail", detail: "Deploy fallback for low confidence translations." },
+      ],
+    },
+  },
+  {
+    id: "RISK-88",
+    name: "Third-Party Risk Analyst",
+    status: "paused",
+    businessUnit: "Risk & Compliance",
+    owner: "Enterprise Trust",
+    successRate: 0.76,
+    automationRate: 0.52,
+    avgLatency: 12.5,
+    hoursSaved: 1830,
+    lastIncident: "2h ago",
+    riskLevel: "high",
+    adoption: "Vendor Management",
+    dependencies: {
+      tools: ["GRC Vault", "DocuSign"],
+      connectors: ["AI Gateway", "Policy Engine"],
+      policies: ["AI Act Tier 2", "Vendor Risk Guardrails"],
+    },
+    guardrails: [
+      { name: "Sensitive Document Access", status: "red" },
+      { name: "Dual Control", status: "orange" },
+    ],
+    recentActivity: [
+      "Paused after exceeding false positive threshold",
+      "Requested manual review for procurement contract",
+      "Generated audit evidence pack for Q3",
+    ],
+    hitl: {
+      queue: [
+        {
+          id: "HITL-7201",
+          title: "Legal interpretation required",
+          description:
+            "Clause 14.2 conflict with latest AI Act guidance; needs human counsel sign-off before release.",
+          sla: "2h 10m",
+          assignee: "Enterprise Legal",
+          channel: "Jira",
+          status: "pending",
+        },
+        {
+          id: "HITL-7210",
+          title: "Risk scoring override",
+          description:
+            "False positive triggered for low-risk supplier after sanctions list update. Validate scoring weights.",
+          sla: "55m",
+          assignee: "Risk Operations",
+          channel: "Email",
+          status: "pending",
+        },
+        {
+          id: "HITL-7188",
+          title: "DocuSign contract attachment missing",
+          description:
+            "Vendor failed to upload cybersecurity questionnaire; manual outreach required.",
+          sla: "4h",
+          assignee: "Vendor Management",
+          channel: "ServiceNow",
+          status: "escalated",
+        },
+      ],
+      decisionLog: [
+        "2024-07-17 06:30 • Agent paused automatically after policy violation",
+        "2024-07-16 15:24 • Legal added interim language to clause 14.2",
+        "2024-07-15 09:12 • Risk Ops reset scoring weights after sanctions data update",
+      ],
+      playbooks: [
+        "Dual control evidence capture",
+        "Sanctions data reconciliation",
+        "Contract clause interpretation",
+      ],
+    },
+    performance: {
+      metrics: [
+        { label: "Vendors Processed", value: "84", trend: "-12% vs. target" },
+        { label: "False Positives", value: "29", trend: "+6" },
+        { label: "Manual Reviews", value: "41", trend: "+12" },
+        { label: "Average SLA", value: "18.4 hrs", trend: "+4.1 hrs" },
+      ],
+      errorBreakdown: [
+        { label: "Policy Violations", count: 7, change: "+3" },
+        { label: "Document Missing", count: 11, change: "+5" },
+        { label: "Model Drift", count: 4, change: "+2" },
+      ],
+      incidents: [
+        {
+          timestamp: "2024-07-17 06:28",
+          summary: "Policy engine flagged cross-border data transfer risk and paused agent.",
+          resolution: "Awaiting legal approval after manual remediation steps.",
+        },
+        {
+          timestamp: "2024-07-16 15:15",
+          summary: "Sanctions list update inflated risk scores for 34 vendors.",
+          resolution: "Risk Ops reweighted features and queued reruns.",
+        },
+        {
+          timestamp: "2024-07-14 11:02",
+          summary: "Vendor questionnaire ingestion failed due to document schema change.",
+          resolution: "Fallback template deployed with manual verification for affected vendors.",
+        },
+      ],
+      evaluationNotes: [
+        "Need to retrain classification head with latest legal annotations to reduce clause escalations.",
+        "Introduce dual-review guardrail automation to unblock low-risk renewals.",
+        "Expand telemetry to capture vendor-provided document schema variants.",
+      ],
+    },
+    insights: {
+      narrative:
+        "Third-Party Risk Analyst is paused due to compliance guardrail hits. False positives and document completeness are the main blockers to restoring autonomy.",
+      actions: [
+        {
+          title: "Stand up compliance tiger team",
+          description: "Pair legal, risk ops, and vendor management for 72-hour remediation sprint.",
+          impact: "Resume agent with dual control intact",
+          owner: "Enterprise Trust",
+          due: "Today",
+          status: "Critical",
+        },
+        {
+          title: "Automate document reminder sequence",
+          description: "Trigger DocuSign follow-ups and Slack reminders for missing questionnaires.",
+          impact: "Reduce manual outreach by 60%",
+          owner: "Vendor Management",
+          due: "This week",
+          status: "In Build",
+        },
+        {
+          title: "Retrain policy classifier",
+          description: "Augment training data with latest AI Act interpretations from legal counsel.",
+          impact: "Cut policy violations by half",
+          owner: "Risk Ops ML",
+          due: "Sprint +1",
+          status: "Planned",
+        },
+      ],
+      opportunities: [
+        { label: "Document AI", detail: "Leverage OCR to normalize questionnaires across vendors." },
+        { label: "Policy sandbox", detail: "Test new clause templates in offline environment before promotion." },
+        { label: "Feedback loop", detail: "Reward reviewers who clear backlog with fewer escalations." },
+      ],
+    },
+  },
+  {
+    id: "SUPPLY-61",
+    name: "Supply Chain Navigator",
+    status: "active",
+    businessUnit: "Operations",
+    owner: "Fulfillment PMO",
+    successRate: 0.91,
+    automationRate: 0.68,
+    avgLatency: 8.4,
+    hoursSaved: 3810,
+    lastIncident: "7d ago",
+    riskLevel: "medium",
+    adoption: "Global Logistics",
+    dependencies: {
+      tools: ["SAP IBP", "Snowflake"],
+      connectors: ["Mosaic Gateway", "Vertex Forecast API"],
+      policies: ["Export Control", "Supplier Compliance"],
+    },
+    guardrails: [
+      { name: "Cold Chain Policy", status: "green" },
+      { name: "Supplier Risk", status: "green" },
+    ],
+    recentActivity: [
+      "Predicted port congestion impact for APAC",
+      "Triggered alternate route automation",
+      "Logged scenario to optimization notebook",
+    ],
+    hitl: {
+      queue: [
+        {
+          id: "HITL-6404",
+          title: "Confirm cold-chain variance",
+          description:
+            "Temperature monitor flagged slight variance on refrigerated shipment; needs ops manager review.",
+          sla: "50m",
+          assignee: "Regional Logistics",
+          channel: "PagerDuty",
+          status: "pending",
+        },
+        {
+          id: "HITL-6398",
+          title: "Carrier substitution approval",
+          description:
+            "Agent recommending alternate carrier due to port congestion for Shanghai lane.",
+          sla: "2h",
+          assignee: "Transportation Lead",
+          channel: "Slack",
+          status: "pending",
+        },
+        {
+          id: "HITL-6385",
+          title: "Supplier compliance follow-up",
+          description:
+            "Need manual verification that supplier uploaded updated ISO certifications.",
+          sla: "6h",
+          assignee: "Supplier Quality",
+          channel: "Email",
+          status: "completed",
+        },
+      ],
+      decisionLog: [
+        "2024-07-16 16:55 • Alternate carrier approved for Shanghai lane",
+        "2024-07-15 11:22 • Supplier quality confirmed ISO cert upload",
+        "2024-07-14 07:05 • Ops cleared cold-chain variance after sensor recalibration",
+      ],
+      playbooks: [
+        "Cold-chain variance response",
+        "Carrier substitution evaluation",
+        "Supplier compliance validation",
+      ],
+    },
+    performance: {
+      metrics: [
+        { label: "On-time Deliveries", value: "96%", trend: "+3 pts" },
+        { label: "Exception Rate", value: "11%", trend: "-2 pts" },
+        { label: "Inventory Carry", value: "28 days", trend: "-1.5 days" },
+        { label: "Scenario Runs", value: "312", trend: "+24" },
+      ],
+      errorBreakdown: [
+        { label: "Sensor Variance", count: 4, change: "-1" },
+        { label: "Data Latency", count: 6, change: "+2" },
+        { label: "Supplier Docs", count: 2, change: "Stable" },
+      ],
+      incidents: [
+        {
+          timestamp: "2024-07-16 16:40",
+          summary: "Congestion index spiked for Shanghai causing reroute recommendation.",
+          resolution: "Transportation lead validated cost impact and approved new carrier mix.",
+        },
+        {
+          timestamp: "2024-07-14 06:50",
+          summary: "Cold chain sensor produced false positive due to calibration drift.",
+          resolution: "Technician recalibrated sensors and agent resumed automated routing.",
+        },
+        {
+          timestamp: "2024-07-12 03:10",
+          summary: "Snowflake sync lagged causing stale inventory snapshot.",
+          resolution: "Enabled incremental sync and reran affected scenarios.",
+        },
+      ],
+      evaluationNotes: [
+        "Need to expose congestion confidence intervals to transportation planners.",
+        "Explore synthetic data augmentation for low-volume shipping lanes.",
+        "Add upstream alert when Snowflake sync lags beyond 5 minutes.",
+      ],
+    },
+    insights: {
+      narrative:
+        "Supply Chain Navigator is driving on-time delivery improvements. HITL interactions revolve around risk-sensitive logistics changes that can be templated for faster approval.",
+      actions: [
+        {
+          title: "Pre-authorize carrier substitutions",
+          description: "Define guardrail thresholds where alternate carrier choices auto-approve when cost delta <5%.",
+          impact: "Shrink approval cycle by 30%",
+          owner: "Transportation Lead",
+          due: "Next ops review",
+          status: "Drafting",
+        },
+        {
+          title: "Instrument congestion confidence",
+          description: "Publish daily congestion confidence intervals directly in planner UI.",
+          impact: "Increase planner trust",
+          owner: "Supply Analytics",
+          due: "Sprint +1",
+          status: "In Design",
+        },
+        {
+          title: "Automate sensor recalibration alerts",
+          description: "Tie IoT diagnostics into observability hub for proactive calibration scheduling.",
+          impact: "Remove 2 manual interventions/week",
+          owner: "IoT Engineering",
+          due: "Aug 5",
+          status: "Planned",
+        },
+      ],
+      opportunities: [
+        { label: "Scenario library", detail: "Add near-shore manufacturing scenario set." },
+        { label: "Supplier insights", detail: "Share compliance telemetry with vendor portal." },
+        { label: "Ops training", detail: "Include AI agent orientation in new hire bootcamp." },
+      ],
+    },
+  },
+  {
+    id: "HR-142",
+    name: "Talent Mobility Advisor",
+    status: "failed",
+    businessUnit: "People",
+    owner: "HR Innovation",
+    successRate: 0.63,
+    automationRate: 0.41,
+    avgLatency: 5.9,
+    hoursSaved: 940,
+    lastIncident: "12m ago",
+    riskLevel: "medium",
+    adoption: "Corporate HR",
+    dependencies: {
+      tools: ["Workday", "Greenhouse"],
+      connectors: ["AI Gateway", "Employee Graph"],
+      policies: ["PII Safe Handling", "Bias Monitoring"],
+    },
+    guardrails: [
+      { name: "Bias Monitoring", status: "red" },
+      { name: "PII Masking", status: "orange" },
+    ],
+    recentActivity: [
+      "Failed to complete internal transfer recommendation",
+      "Escalated to HRBP for manual approval",
+      "Opened eval notebook for fairness regression",
+    ],
+    hitl: {
+      queue: [
+        {
+          id: "HITL-5409",
+          title: "Bias remediation approval",
+          description:
+            "Fairness regression flagged for engineering candidates; need HRBP confirmation before restart.",
+          sla: "1h",
+          assignee: "HR Business Partner",
+          channel: "Slack",
+          status: "pending",
+        },
+        {
+          id: "HITL-5413",
+          title: "PII redaction audit",
+          description:
+            "Sampled transcripts require verification that masking worked prior to compliance submission.",
+          sla: "3h",
+          assignee: "Privacy Office",
+          channel: "Jira",
+          status: "pending",
+        },
+        {
+          id: "HITL-5388",
+          title: "Model rollback validation",
+          description:
+            "Need sign-off that fallback model meets fairness baseline before agent resumes.",
+          sla: "4h",
+          assignee: "Responsible AI Council",
+          channel: "Email",
+          status: "escalated",
+        },
+      ],
+      decisionLog: [
+        "2024-07-17 09:02 • Agent halted after fairness regression breached threshold",
+        "2024-07-16 13:48 • Privacy team initiated deep dive on masking efficacy",
+        "2024-07-15 18:05 • Responsible AI Council requested expanded audit sample",
+      ],
+      playbooks: [
+        "Bias remediation workflow",
+        "PII masking verification",
+        "Model rollback governance",
+      ],
+    },
+    performance: {
+      metrics: [
+        { label: "Recommendations Delivered", value: "118", trend: "-22%" },
+        { label: "Approvals Required", value: "61", trend: "+18" },
+        { label: "Fairness Delta", value: "+6.1 pts", trend: "+3.4" },
+        { label: "PII Violations", value: "4", trend: "+2" },
+      ],
+      errorBreakdown: [
+        { label: "Fairness Alerts", count: 9, change: "+5" },
+        { label: "Data Quality", count: 3, change: "+1" },
+        { label: "Policy Breaches", count: 4, change: "+2" },
+      ],
+      incidents: [
+        {
+          timestamp: "2024-07-17 08:50",
+          summary: "Bias monitoring detected regression on technical hiring recommendations.",
+          resolution: "Agent failed closed; awaiting human review of mitigation plan.",
+        },
+        {
+          timestamp: "2024-07-16 12:10",
+          summary: "Privacy audit found inconsistent masking of phone numbers in transcripts.",
+          resolution: "Escalated to privacy office for manual inspection and patch.",
+        },
+        {
+          timestamp: "2024-07-14 20:45",
+          summary: "Fallback model failed to meet fairness baseline during evaluation run.",
+          resolution: "Responsible AI Council requested expanded dataset prior to restart.",
+        },
+      ],
+      evaluationNotes: [
+        "Need to retrain fairness classifier with balanced dataset focusing on technical roles.",
+        "Consider synthetic augmentation for underrepresented groups to stabilize metrics.",
+        "Automate PII masking smoke test as part of deployment pipeline.",
+      ],
+    },
+    insights: {
+      narrative:
+        "Talent Mobility Advisor is offline until fairness and privacy regressions are resolved. Humans are coordinating remediation across HR, privacy, and responsible AI teams.",
+      actions: [
+        {
+          title: "Launch fairness remediation sprint",
+          description: "Bring HR analytics and Responsible AI Council together for 48-hour working session.",
+          impact: "Restore fairness metrics within threshold",
+          owner: "HR Analytics",
+          due: "Today",
+          status: "Critical",
+        },
+        {
+          title: "Automate masking regression tests",
+          description: "Add deterministic redaction tests into CI/CD before each release.",
+          impact: "Prevent privacy regressions",
+          owner: "Platform Engineering",
+          due: "This sprint",
+          status: "In Build",
+        },
+        {
+          title: "Publish transparent postmortem",
+          description: "Share findings with employees and outline guardrail hardening plan.",
+          impact: "Rebuild trust",
+          owner: "HR Communications",
+          due: "Friday",
+          status: "Drafting",
+        },
+      ],
+      opportunities: [
+        { label: "Evaluation coverage", detail: "Expand fairness tests to lateral moves and contractor conversions." },
+        { label: "Explainability", detail: "Add SHAP-based rationale view for HR reviewers." },
+        { label: "Training data", detail: "Partner with TA to source fresh annotated examples." },
+      ],
+    },
+  },
+];
+
+export const actionQueue = [
+  {
+    id: "INC-4450",
+    title: "Procurement Contract Review",
+    summary: "Vendor clause flagged as ambiguous. Needs legal validation before execution.",
+    status: "pending",
+    sla: "02:15",
+    businessUnit: "Risk & Compliance",
+    workflow: "Third-Party Risk Analyst",
+    urgency: "high",
+  },
+  {
+    id: "INC-4412",
+    title: "Customer Refund Escalation",
+    summary: "High value customer requested manual override for refund exception.",
+    status: "pending",
+    sla: "00:42",
+    businessUnit: "Customer Experience",
+    workflow: "Customer Care Orchestrator",
+    urgency: "critical",
+  },
+  {
+    id: "INC-4390",
+    title: "AI Policy Drift",
+    summary: "Policy pack mismatch detected between staging and production gateways.",
+    status: "escalated",
+    sla: "04:20",
+    businessUnit: "Platform",
+    workflow: "Gateway Governance",
+    urgency: "medium",
+  },
+  {
+    id: "INC-4302",
+    title: "Forecast Accuracy Regression",
+    summary: "A/B test variant B regressed cost-to-serve by 6%.",
+    status: "investigating",
+    sla: "08:00",
+    businessUnit: "Operations",
+    workflow: "Supply Chain Navigator",
+    urgency: "medium",
+  },
+  {
+    id: "INC-4220",
+    title: "Successful Automation Review",
+    summary: "Bulk billing adjustments auto-approved with zero escalations for 48h.",
+    status: "completed",
+    sla: "--",
+    businessUnit: "Finance",
+    workflow: "Revenue Ops Planner",
+    urgency: "low",
+  },
+];
+
+export const insights = {
+  ops: [
+    { label: "Autonomy Rate", value: "78%", trend: "+6.2% vs last month" },
+    { label: "Average Time Saved", value: "11.4 hrs/task", trend: "+1.8 hrs" },
+    { label: "Escalation MTTR", value: "34 min", trend: "-12 min" },
+    { label: "Coverage", value: "146 agents", trend: "+18 onboarded" },
+  ],
+  exec: [
+    { label: "Hours Returned to Business", value: "38,420", trend: "+4,120 YoY" },
+    { label: "Net Cost Avoidance", value: "$7.9M", trend: "+$900k QoQ" },
+    { label: "CSAT Lift", value: "+9.4 pts", trend: "+1.1 pts" },
+    { label: "Adoption Velocity", value: "21 new teams", trend: "+5 vs target" },
+  ],
+  security: [
+    { label: "Policy Coverage", value: "98.4%", trend: "+0.8%" },
+    { label: "High Risk Agents", value: "4", trend: "-2 vs last week" },
+    { label: "Audit Evidence Packs", value: "27 ready", trend: "GDPR, HIPAA" },
+    { label: "Incident Containment", value: "< 6 min", trend: "SOAR auto-closure" },
+  ],
+};
+
+export const recommendations = [
+  {
+    title: "Promote Variant B for Customer Care",
+    impact: "+4.2% FCR / -3% cost",
+    rationale: "Lang model swap in canary shows consistent quality uplift with lower token spend.",
+    owner: "Support Ops",
+    due: "Ready for rollout",
+  },
+  {
+    title: "Enable Retrieval Cache for Revenue Ops",
+    impact: "-$12k monthly / latency -18%",
+    rationale: "High repeat queries detected on fiscal planning scenarios.",
+    owner: "Ops Automation Guild",
+    due: "Pilot scheduled",
+  },
+  {
+    title: "Tighten Vendor Risk Guardrail",
+    impact: "Reduce false positives by 22%",
+    rationale: "Policy evaluation shows over-triggering on low risk suppliers.",
+    owner: "Enterprise Trust",
+    due: "Needs legal review",
+  },
+];
+
+export const policies = [
+  {
+    name: "PII Safe Handling",
+    coverage: "Global",
+    status: "green",
+    description: "Auto-redaction enforced across CRM, ERP, and support transcripts.",
+    lastAudit: "6h ago",
+  },
+  {
+    name: "GDPR Residency",
+    coverage: "EU Region",
+    status: "green",
+    description: "Geo-fenced storage and inference enforced via AI Gateway policies.",
+    lastAudit: "2h ago",
+  },
+  {
+    name: "Bias Monitoring",
+    coverage: "People Ops",
+    status: "orange",
+    description: "Drift detected on fairness metrics for Talent Mobility Advisor.",
+    lastAudit: "20m ago",
+  },
+  {
+    name: "Incident Response",
+    coverage: "Enterprise",
+    status: "green",
+    description: "SOAR playbooks executed with 99% SLA adherence.",
+    lastAudit: "11h ago",
+  },
+];
+
+export const experiments = [
+  {
+    name: "Support Agent Model Swap",
+    status: "Running",
+    detail: "A/B testing GPT-4o vs. Claude Opus for refund workflows.",
+    completion: 64,
+  },
+  {
+    name: "Revenue Plan Strategy",
+    status: "Canary",
+    detail: "Tool sequencing variant with scenario caching enabled.",
+    completion: 32,
+  },
+  {
+    name: "Risk Policy Tuning",
+    status: "Design",
+    detail: "Notebook-driven evals on supplier onboarding accuracy.",
+    completion: 18,
+  },
+];
