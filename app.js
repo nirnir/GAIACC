@@ -27,6 +27,53 @@ const telemetry = [
   "Product | New agent templates published for Finance close workflows.",
 ];
 
+const slugify = (value) =>
+  value
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const createBadge = (label, className) =>
+  `<span class="catalog-badge ${className}">${label}</span>`;
+
+const statusBadge = (status) => createBadge(status, `status-${slugify(status)}`);
+
+const domainBadge = (domain) => createBadge(domain, `domain-${slugify(domain)}`);
+
+const ownerBadge = (owner) => createBadge(owner, `owner-${slugify(owner)}`);
+
+const buildDomainOwnerCell = (domain, owner) => {
+  const badges = [domainBadge(domain)];
+  if (owner && owner !== domain) {
+    badges.push(ownerBadge(owner));
+  }
+  return badges.join(" ");
+};
+
+const triggerBadge = (trigger) => {
+  if (!trigger) return "";
+  if (typeof trigger === "string") {
+    return createBadge(trigger, `trigger-${slugify(trigger)}`);
+  }
+  const type = trigger.type ? slugify(trigger.type) : slugify(trigger.label ?? "");
+  const label = trigger.label ?? trigger.type ?? "";
+  return createBadge(label, `trigger-${type}`);
+};
+
+const personaBadge = (persona) => createBadge(persona, `persona-${slugify(persona)}`);
+
+const createMetricPill = (value, label) =>
+  `<span class="metric-pill"><strong>${value}</strong>${label ? `<span>${label}</span>` : ""}</span>`;
+
+const createTimestamp = (text) => `<span class="timestamp-text">${text}</span>`;
+
+const createAdoptionBadge = (value) => {
+  const tier = value >= 75 ? "high" : value >= 55 ? "medium" : "low";
+  return `<span class="catalog-badge adoption-${tier}">${value}%</span>`;
+};
+
 const baseFilterOptions = {
   status: [
     { label: "All statuses", value: "all" },
@@ -163,9 +210,6 @@ function renderModule() {
 }
 
 function renderInventoryModule(root) {
-  const catalogSection = buildAgentCatalogSection();
-  root.appendChild(catalogSection);
-
   const filteredAgents = agents.filter((agent) => {
     const statusMatch =
       state.filters.status === "all" || agent.status === state.filters.status;
@@ -192,6 +236,9 @@ function renderInventoryModule(root) {
   }
 
   root.appendChild(overview);
+
+  const catalogSection = buildAgentCatalogSection();
+  root.appendChild(catalogSection);
 }
 
 function buildAgentCatalogSection() {
@@ -211,11 +258,13 @@ function buildAgentCatalogSection() {
       title: "Automated Agentic AI Workflows",
       description: "Hands-off automations operating within guardrails.",
       entries: agentCatalog.automated,
+      variant: "automated",
     },
     {
       title: "Assisted Agentic AI (Copilot / Human-in-the-Loop)",
       description: "Embedded copilots that support teams with insights and recommendations.",
       entries: agentCatalog.assisted,
+      variant: "assisted",
     },
   ];
 
@@ -234,27 +283,79 @@ function buildAgentCatalogSection() {
     tableWrapper.className = "catalog-table-wrapper";
 
     const table = document.createElement("table");
-    table.className = "catalog-table";
+    table.className = `catalog-table catalog-table--${group.variant}`;
 
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th scope="col">Agent Name</th>
-          <th scope="col">Type</th>
-          <th scope="col">Key Properties</th>
-        </tr>
-      </thead>
-    `;
+    if (group.variant === "automated") {
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th scope="col">Workflow ID / Name</th>
+            <th scope="col">Domain / Owner</th>
+            <th scope="col">Status</th>
+            <th scope="col">Trigger Type</th>
+            <th scope="col">Run Time</th>
+            <th scope="col">Next Scheduled Run</th>
+            <th scope="col">Last Execution Timestamp</th>
+          </tr>
+        </thead>
+      `;
+    } else {
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th scope="col">Workflow ID / Name</th>
+            <th scope="col">Monthly Active Users (MAU)</th>
+            <th scope="col">Adoption %</th>
+            <th scope="col">User Role / Persona</th>
+            <th scope="col">Domain / Owner</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+      `;
+    }
 
     const tbody = document.createElement("tbody");
 
     group.entries.forEach((entry) => {
       const row = document.createElement("tr");
-      row.innerHTML = `
-        <th scope="row">${entry.name}</th>
-        <td data-label="Type">${entry.type}</td>
-        <td data-label="Key Properties">${entry.properties}</td>
-      `;
+      if (group.variant === "automated") {
+        row.innerHTML = `
+          <th scope="row">
+            <div class="workflow-cell">
+              <span class="workflow-id">${entry.id}</span>
+              <span class="workflow-name">${entry.name}</span>
+            </div>
+          </th>
+          <td data-label="Domain / Owner">
+            <div class="badge-stack">${buildDomainOwnerCell(entry.domain, entry.owner)}</div>
+          </td>
+          <td data-label="Status">${statusBadge(entry.status)}</td>
+          <td data-label="Trigger Type">${triggerBadge(entry.trigger)}</td>
+          <td data-label="Run Time">${createMetricPill(
+            entry.runTime.value,
+            entry.runTime.descriptor
+          )}</td>
+          <td data-label="Next Scheduled Run">${createTimestamp(entry.nextRun)}</td>
+          <td data-label="Last Execution Timestamp">${createTimestamp(entry.lastRun)}</td>
+        `;
+      } else {
+        const mau = entry.mau.toLocaleString("en-US");
+        row.innerHTML = `
+          <th scope="row">
+            <div class="workflow-cell">
+              <span class="workflow-id">${entry.id}</span>
+              <span class="workflow-name">${entry.name}</span>
+            </div>
+          </th>
+          <td data-label="Monthly Active Users (MAU)">${createMetricPill(mau, "users")}</td>
+          <td data-label="Adoption %">${createAdoptionBadge(entry.adoption)}</td>
+          <td data-label="User Role / Persona">${personaBadge(entry.persona)}</td>
+          <td data-label="Domain / Owner">
+            <div class="badge-stack">${buildDomainOwnerCell(entry.domain, entry.owner)}</div>
+          </td>
+          <td data-label="Status">${statusBadge(entry.status)}</td>
+        `;
+      }
       tbody.appendChild(row);
     });
 
