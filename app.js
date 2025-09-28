@@ -23,13 +23,6 @@ const state = {
   },
 };
 
-const telemetry = [
-  "Ops | Supply Chain Navigator latency spike mitigated via cache warm-up.",
-  "Security | AI Gateway policy drift resolved with auto-sync.",
-  "Compliance | Generated audit evidence pack for GDPR controllers.",
-  "Product | New agent templates published for Finance close workflows.",
-];
-
 const WORKFLOW_LANES = [
   { key: "running", label: "Running", accent: "green" },
   { key: "paused", label: "Paused", accent: "orange" },
@@ -369,25 +362,10 @@ function buildInventoryHeader(workflowCount) {
   copyBlock.innerHTML = `
     <h3>Operational snapshot</h3>
     <p class="muted">Live signals from automated and assisted workflows.</p>
+    <p class="muted inventory-total-note">${workflowCount} workflows in view</p>
   `;
 
-  const pillTray = document.createElement("div");
-  pillTray.className = "inventory-pills";
-
-  telemetry.forEach((line, index) => {
-    const pill = document.createElement("span");
-    pill.className = `status-pill ${index % 3 === 0 ? "green" : index % 3 === 1 ? "orange" : "red"}`;
-    pill.textContent = line;
-    pillTray.appendChild(pill);
-  });
-
-  const total = document.createElement("span");
-  total.className = "status-pill green";
-  total.textContent = `${workflowCount} workflows in view`;
-  pillTray.appendChild(total);
-
   header.appendChild(copyBlock);
-  header.appendChild(pillTray);
   return header;
 }
 
