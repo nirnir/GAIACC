@@ -49,10 +49,30 @@ body {
   border-right: 1px solid var(--border-soft);
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
   position: sticky;
   top: 0;
   height: 100vh;
+}
+
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.sidebar-header h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.sidebar-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 .brand {
@@ -341,6 +361,19 @@ td .workflow-cell {
   text-transform: uppercase;
   color: var(--accent-500);
   font-weight: 600;
+}
+
+.workflow-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.workflow-link:hover,
+.workflow-link:focus {
+  color: var(--accent-500);
+  text-decoration: underline;
+  text-decoration-color: rgba(37, 99, 235, 0.6);
 }
 
 .workflow-name {
@@ -1138,6 +1171,214 @@ td .workflow-cell {
   font-size: 1.3rem;
 }
 
+.workflow-hero-card {
+  gap: 24px;
+}
+
+.workflow-narrative {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.detail-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-500);
+}
+
+.workflow-detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.workflow-key-list {
+  margin: 16px 0 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.workflow-health-list {
+  display: grid;
+  gap: 12px;
+}
+
+.workflow-health-item {
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+  background: var(--surface);
+}
+
+.workflow-health-item span {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.workflow-health-item strong {
+  font-size: 1.1rem;
+}
+
+.workflow-health-item p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.workflow-health-item.tone-positive {
+  border-left: 4px solid var(--success);
+}
+
+.workflow-health-item.tone-warning {
+  border-left: 4px solid var(--warning);
+}
+
+.workflow-health-item.tone-critical {
+  border-left: 4px solid var(--danger);
+}
+
+.workflow-health-item.tone-neutral {
+  border-left: 4px solid rgba(37, 99, 235, 0.3);
+}
+
+.workflow-action-list {
+  display: grid;
+  gap: 12px;
+}
+
+.workflow-action-item {
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  background: var(--surface);
+}
+
+.workflow-action-item header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.workflow-action-item h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.workflow-action-item p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.workflow-action-item footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.action-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.action-status--in-progress {
+  background: rgba(245, 158, 11, 0.18);
+  color: #92400e;
+}
+
+.action-status--planned {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-500);
+}
+
+.action-status--ready {
+  background: rgba(22, 163, 74, 0.16);
+  color: #166534;
+}
+
+.workflow-timeline {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.workflow-timeline-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: var(--surface);
+}
+
+.timeline-time {
+  font-weight: 600;
+  color: var(--accent-500);
+}
+
+.workflow-timeline-item strong {
+  font-size: 0.95rem;
+}
+
+.workflow-timeline-item p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.workflow-context-card {
+  display: grid;
+  gap: 16px;
+}
+
+.workflow-context-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.workflow-context-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.overview-guidance {
+  margin-top: 12px;
+}
+
 .hitl-console {
   gap: 20px;
 }
@@ -1387,6 +1628,10 @@ td .workflow-cell {
   gap: 18px;
 }
 
+.hitl-workflow-layout {
+  align-items: stretch;
+}
+
 .queue-column {
   background: var(--surface);
   border: 1px solid var(--border-soft);
@@ -1415,10 +1660,28 @@ td .workflow-cell {
   gap: 12px;
 }
 
+.hitl-workflow-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+}
+
+.hitl-workflow-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  border-color: rgba(37, 99, 235, 0.28);
+}
+
 .queue-card header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+
+.queue-status-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  text-align: right;
 }
 
 .queue-meta {
@@ -1438,6 +1701,30 @@ td .workflow-cell {
   margin: 0;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+.queue-insights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.queue-insights div {
+  background: var(--surface);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.queue-insights span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.queue-insights strong {
+  font-size: 0.95rem;
 }
 
 .policy-grid {
